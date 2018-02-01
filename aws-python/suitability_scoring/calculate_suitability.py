@@ -21,21 +21,34 @@ suitability : double
 '''
 def calculate_suitability(article_heuristics, comparison_heuristics, heuristics):
     suitability = 0
+    # normalize weights
+    normalized_weights = {}
+    # get weights total
+    total_weights = 0
+    for h in heuristics:
+        if h in weights:
+            total_weights += weights[h]
+        else:
+            total_weights += 1.0
+
+    # calculate normalized weights by dividing by total
+    for h in heuristics:
+        if h in weights:
+            normalized_weights[h] = weights[h] / total_weights
+        else:
+            normalized_weights[h] = 1.0/total_weights
+
     # Sum heuristics using weights
     for h in heuristics:
         # calculate abs difference between each heuristic for the original and similar article
         difference = abs(article_heuristics[h] - comparison_heuristics[h])
         # get weight, checking it exists
-        if h in weights:
-            weight = weights[h]
-        else:
-            weight = 1.0
+        weight = normalized_weights[h]
         # add weighted difference to suitability
         suitability += weight*difference
 
     # return the weighted average of the differences
-    # TODO: check maths for this makes sense with weights
-    return suitability / len(heuristics)
+    return suitability
 
 
 '''
