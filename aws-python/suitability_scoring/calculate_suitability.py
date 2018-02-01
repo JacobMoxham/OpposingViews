@@ -23,12 +23,18 @@ def calculate_suitability(article_heuristics, comparison_heuristics, heuristics)
     suitability = 0
     # Sum heuristics using weights
     for h in heuristics:
-        # Calulate abs difference between each heuristic for the original and similar article
+        # calculate abs difference between each heuristic for the original and similar article
         difference = abs(article_heuristics[h] - comparison_heuristics[h])
-        weight = weights[h]
+        # get weight, checking it exists
+        if h in weights:
+            weight = weights[h]
+        else:
+            weight = 1.0
+        # add weighted difference to suitability
         suitability += weight*difference
 
-    #Return the weighted average of the differences
+    # return the weighted average of the differences
+    # TODO: check maths for this makes sense with weights
     return suitability / len(heuristics)
 
 
