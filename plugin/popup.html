@@ -4,14 +4,37 @@
   <head>
     <title>Opposing Views</title>
     <link rel=stylesheet href="popup.css" type="text/css">
-    <script src="make_table.js"></script>
    <script src="popup.js"></script>
+   <script src="jquery-3.3.1.min.js"></script></script>
   </head>
 
   <body>
     <h1>Suggested Articles</h1>
     <div id="container">
-      
+		<table id="suggested-article-list" class="article-list">
+			<tr class="list-element-row">
+				<td>
+					<table class="list-element-table">
+						<tr>
+							<td class="list-element-image" rowspan="3">
+								<img>
+							</td>
+							<td class="list-element-title"></td>
+						</tr>
+						<tr>
+							<td class="list-element-summary">
+							</td>
+						</tr>
+						<tr>
+							<td class="feedback-thumbs">
+								<img src="thumbs-up.png" class="thumbs-up">
+								<img src="thumbs-down.png" class="thumbs-down">
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
     </div>
   </body>
 </html>
