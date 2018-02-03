@@ -2,6 +2,7 @@ body {
         margin: 0.5em;
         white-space: nowrap;
         width: 50em;
+        font-family: helvetica;
       }
 h1 {
         font-size: 2em;

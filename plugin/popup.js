@@ -22,7 +22,7 @@ function onWindowLoad() {
     chrome.tabs.sendMessage(tabs[0].id,
       {'action': 'sourceRequest'},
       function(src) {
-        data = '{"src": "' + encodeURI(src) + '"}';
+        data = '{"src": "' + encodeURI(src) + '", "link": "' + tabs[0].url + '"}';
         sendAPIRequest(data, backendProcessingAPI, (res) => {message.appendChild(createSuggestedArticleTable(JSON.parse(res)));});
 
 	  });
