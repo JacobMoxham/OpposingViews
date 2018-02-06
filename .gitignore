@@ -1,1 +1,3 @@
 aws-python/aws.zip
+aws-python/classifiers/*.csv
+aws-python/classifiers/__pycache__
