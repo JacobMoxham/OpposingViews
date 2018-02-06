@@ -3,46 +3,47 @@ const api_base = "https://q33wccsyz5.execute-api.eu-west-1.amazonaws.com/dev/"
 const backendProcessingAPI = api_base + "extensionBackend";
 const feedbackProcessingAPI = api_base + "feedback-processing";
 
-function getLink(suggestedArticles, i) {
-	return suggestedArticles[i].link;
-}
-
 /*
  * Creates a list of items which represents a list of suggested
  * articles as a table
  * */
-function createSuggestedArticleTable(suggestedArticles) {
+function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
   
   for (var i = 0; i < suggestedArticles.length; i++) {
-	var suggestedArticle = suggestedArticles[i];
+	var suggestedArticle = suggestedArticles[i]; 
 	
-	console.log(suggestedArticle.link);
-	console.log(suggestedArticle.title);  
-	
+	/*Take an element from the prototype and add the article-specific parameters to it*/
 	var item = $(".list-element-row:first").clone()
 	
 	item.find(".list-element-image img").attr("src", suggestedArticle.imageLink);
 	item.find(".list-element-title").text(suggestedArticle.title);
 	item.find(".list-element-summary").text(suggestedArticle.summary);
 	
-	item.find(".list-element-table tr").click({link:suggestedArticle.link}, (ev) => {chrome.tabs.create({url:ev.data.link});});
+	item.find(".list-element-table tr").click({link:suggestedArticle.link, previousLink: currentArticleURL}, 
+		(ev) => {
+			var keyval = {};
+			keyval[ev.data.link] = ev.data.previousLink;
+			chrome.storage.local.set(keyval, () => {chrome.tabs.create({url:ev.data.link});});
+		});
+			
 	item.find(".list-element-table tr:last").off();
 	
-	item.find(".thumbs-up").click({link:suggestedArticle.link}, (ev) => {sendFeedback("positive", ev.data.link);});
-	item.find(".thumbs-down").click({link:suggestedArticle.link}, (ev) => {sendFeedback("negative", ev.data.link);});
+	item.find(".thumbs-up").click({link:suggestedArticle.link, fromLink: currentArticleURL}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.link);});
+	item.find(".thumbs-down").click({link:suggestedArticle.link, fromLink: currentArticleURL}, (ev) => {sendFeedback("negative", ev.data.fromLink, ev.data.link);});
 
 	$("#suggested-article-list").append(item);
   }
    
+   /*Now remove the prototype as we don't need it*/
     $(".list-element-row:first").remove();
     
 }
 
 
-function sendFeedback(feedback, suggestedArticleLink) {
+function sendFeedback(feedback, fromLink, suggestedArticleLink) {
      chrome.tabs.query({active: true, lastFocusedWindow: true},
        function(tabs) {
-         data = '{"from": "' + tabs[0].url + '", "to": "' + suggestedArticleLink + '", "feedback": "' + feedback + '"}';
+         data = '{"from": "' + fromLink + '", "to": "' + suggestedArticleLink + '", "feedback": "' + feedback + '"}';
 
          sendAPIRequest(data, 
            feedbackProcessingAPI, 
@@ -53,15 +54,22 @@ function sendFeedback(feedback, suggestedArticleLink) {
 function onWindowLoad() {
   var message = document.getElementById('container');
   $("#suggested-article-list").hide();
-  
+  $("#feedback-request").hide();
     
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id,
-      {'action': 'sourceRequest'},
-      function(src) {
-        data = '{"src": "' + encodeURI(src) + '", "link": "' + tabs[0].url + '"}';
+      {'action': 'sourceRequest', 'currURL': tabs[0].url},
+      function(rtn) {
+        data = '{"src": "' + rtn.src + '", "link": "' + tabs[0].url + '"}';
+        
+        if (rtn.prevURL) {
+			$("#feedback-request .thumbs-up").click({toLink:tabs[0].url, fromLink: rtn.prevURL}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.toLink);});
+			$("#feedback-request .thumbs-down").click({toLink:tabs[0].url, fromLink: rtn.prevURL}, (ev) => {sendFeedback("negative", ev.data.fromLink, ev.data.toLink);});
+			$("#feedback-request").show();
+		}
+        
         sendAPIRequest(data, backendProcessingAPI, (res) => {
-			createSuggestedArticleTable(JSON.parse(res));
+			createSuggestedArticleTable(JSON.parse(res), tabs[0].url);
 			$("#suggested-article-list").show();
 		});
 
@@ -70,19 +78,19 @@ function onWindowLoad() {
  }
 
 function sendAPIRequest(data, api, callback) {
-			var xhr = new XMLHttpRequest();
-			xhr.open("POST", api, true);
-			var msg=data;
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", api, true);
+	var msg=data;
 			
-			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			
-			xhr.onreadystatechange = function() {
-				if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-					callback(xhr.responseText);
-				}
-			};
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+			callback(xhr.responseText);
+		}
+	};
 			
-			xhr.send(msg);
+	xhr.send(msg);
 }
 
 document.addEventListener('DOMContentLoaded', () => { onWindowLoad(); });

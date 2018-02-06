@@ -13,6 +13,13 @@ h1 {
         justify-content: space-between;
 }
 
+#container div {
+  float: left;
+  position: relative;
+  left: 0em;
+  top: 0em;
+}
+
 .list-element-table {
   max-height: 6em;
 }
@@ -38,4 +45,8 @@ h1 {
 .feedback-thumbs img {
   padding: 0.5em;
   max-height: 2em;
+}
+
+#feedback-request .feedback-thumbs {
+  text-align: left;
 }

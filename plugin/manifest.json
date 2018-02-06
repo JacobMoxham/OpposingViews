@@ -22,6 +22,7 @@
 		"tabs",
 		"activeTab",
 		"https://q33wccsyz5.execute-api.eu-west-1.amazonaws.com/",
-		"<all_urls>"
+		"<all_urls>",
+		"storage"
 	]
 }
