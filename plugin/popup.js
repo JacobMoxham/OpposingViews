@@ -28,8 +28,8 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
 			
 	item.find(".list-element-table tr:last").off();
 	
-	item.find(".thumbs-up").click({link:suggestedArticle.link, fromLink: currentArticleURL}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.link);});
-	item.find(".thumbs-down").click({link:suggestedArticle.link, fromLink: currentArticleURL}, (ev) => {sendFeedback("negative", ev.data.fromLink, ev.data.link);});
+	item.find(".thumbs-up").click({link:suggestedArticle.link, fromLink: currentArticleURL, thumbsElem: item.find(".feedback-thumbs")}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.link, ev.data.thumbsElem);});
+	item.find(".thumbs-down").click({link:suggestedArticle.link, fromLink: currentArticleURL, thumbsElem: item.find(".feedback-thumbs")}, (ev) => {sendFeedback("negative", ev.data.fromLink, ev.data.link, ev.data.thumbsElem);});
 
 	$("#suggested-article-list").append(item);
   }
@@ -40,14 +40,14 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
 }
 
 
-function sendFeedback(feedback, fromLink, suggestedArticleLink) {
+function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
      chrome.tabs.query({active: true, lastFocusedWindow: true},
        function(tabs) {
          data = '{"from": "' + fromLink + '", "to": "' + suggestedArticleLink + '", "feedback": "' + feedback + '"}';
 
          sendAPIRequest(data, 
            feedbackProcessingAPI, 
-           (res) => {alert(JSON.parse(res).message);}); 
+           (res) => {alert(JSON.parse(res).message); thumbsElem.hide();}); 
        });
 }
 
@@ -63,8 +63,8 @@ function onWindowLoad() {
         data = '{"src": "' + rtn.src + '", "link": "' + tabs[0].url + '"}';
         
         if (rtn.prevURL) {
-			$("#feedback-request .thumbs-up").click({toLink:tabs[0].url, fromLink: rtn.prevURL}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.toLink);});
-			$("#feedback-request .thumbs-down").click({toLink:tabs[0].url, fromLink: rtn.prevURL}, (ev) => {sendFeedback("negative", ev.data.fromLink, ev.data.toLink);});
+			$("#feedback-request .thumbs-up").click({toLink:tabs[0].url, fromLink: rtn.prevURL, thumbsElem: $("#feedback-request")}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);});
+			$("#feedback-request .thumbs-down").click({toLink:tabs[0].url, fromLink: rtn.prevURL, thumbsElem: $("#feedback-request")}, (ev) => {sendFeedback("negative", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);});
 			$("#feedback-request").show();
 		}
         
