@@ -1,0 +1,52 @@
+body {
+        margin: 0.5em;
+        white-space: nowrap;
+        width: 50em;
+        font-family: helvetica;
+      }
+h1 {
+        font-size: 2em;
+   }
+#container {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+}
+
+#container div {
+  float: left;
+  position: relative;
+  left: 0em;
+  top: 0em;
+}
+
+.list-element-table {
+  max-height: 6em;
+}
+
+.list-element-title {
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.list-element-image img {
+  max-height: 6em;
+  width:auto;
+}
+
+.list-element-table td {
+  white-space: normal;
+}
+
+.feedback-thumbs {
+  text-align:right;
+}
+
+.feedback-thumbs img {
+  padding: 0.5em;
+  max-height: 2em;
+}
+
+#feedback-request .feedback-thumbs {
+  text-align: left;
+}
