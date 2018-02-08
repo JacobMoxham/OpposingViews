@@ -1,2 +1,2 @@
-aws-python/aws.zip
-aws-python/__pycache__
+aws-*/aws.zip
+aws-*/__pycache__
