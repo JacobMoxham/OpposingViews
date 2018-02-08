@@ -1,0 +1,4 @@
+aws-python/aws.zip
+aws-python/__pycache__
+aws-python/classifiers/*.csv
+aws-python/classifiers/__pycache__
