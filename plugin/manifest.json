@@ -1,9 +1,9 @@
 {
 	"manifest_version": 2,
 	
-	"name" : "Example Plugin",
-	"description" : "This is a plugin which sends data to AWS lambda and receives a response",
-	"version":"0.0",
+	"name" : "Opposing Views",
+	"description" : "Suggests articles with a different point of view to what you are currently reading",
+	"version":"0.1",
 	
 	"browser_action": {
 		"default_icon": "icon.png",
@@ -22,6 +22,7 @@
 		"tabs",
 		"activeTab",
 		"https://q33wccsyz5.execute-api.eu-west-1.amazonaws.com/",
-		"<all_urls>"
+		"<all_urls>",
+		"storage"
 	]
 }

@@ -1,42 +1,55 @@
 <!doctype html>
-<!--
- This page is shown when the extension button is clicked, because the
- "browser_action" field in manifest.json contains the "default_popup" key with
- value "popup.html".
- -->
+
 <html>
   <head>
-    <title>Getting Started Extension's Popup</title>
-    <style type="text/css">
-      body {
-        margin: 10px;
-        white-space: nowrap;
-      }
-
-      h1 {
-        font-size: 15px;
-      }
-
-      #container {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-      }
-    </style>
-
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-    -->
-    <script src="popup.js"></script>
+    <title>Opposing Views</title>
+    <link rel=stylesheet href="popup.css" type="text/css">
+   <script src="popup.js"></script>
+   <script src="jquery-3.3.1.min.js"></script></script>
   </head>
 
   <body>
-    <h1>Opposing Views</h1>
+	 <div id="feedback-request">
+		 <h1> Current Article</h1>
+		 <p>
+		 Does this article present a suitable opposing view?</p>
+		 <p class="feedback-thumbs">
+			<img src="thumbs-up.png" class="thumbs-up" />
+			<img src="thumbs-down.png" class="thumbs-down" />
+		</p>
+	</div>
+		
+    <h1>Suggested Articles</h1>
+    
+    <!--prototype of table element layout-->
     <div id="container">
-      <p id="response"></p>
+
+		<table id="suggested-article-list">
+			<tr class="list-element-row">
+				<td>
+					<table class="list-element-table">
+						<tr>
+							<td class="list-element-image" rowspan="3">
+								<img>
+							</td>
+							<td class="list-element-title"></td>
+						</tr>
+						<tr>
+							<td class="list-element-summary">
+							</td>
+						</tr>
+						<tr>
+							<td class="feedback-thumbs">
+								Does this article present a suitable opposing view?
+								<img src="thumbs-up.png" class="thumbs-up" />
+								<img src="thumbs-down.png" class="thumbs-down" />
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		</div>
     </div>
   </body>
 </html>
