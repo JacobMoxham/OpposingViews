@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class SimlarArticleBackend(ABC):
+class SimilarArticleBackend(ABC):
     """
     Defines the interface for the similar article finder backends
     """

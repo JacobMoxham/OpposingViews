@@ -1,11 +1,11 @@
-from .backend import SimlarArticleBackend
+from .backend import SimilarArticleBackend
 import urllib.parse
 import feedparser
 
 BASE_URL = "https://news.google.com/news/rss/explore/section/q/"
 
 
-class BackendGoogle(SimlarArticleBackend):
+class BackendGoogle(SimilarArticleBackend):
     def __init__(self):
         self.backend_name = "Google RSS Feed"
 

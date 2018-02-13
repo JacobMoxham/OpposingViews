@@ -1,11 +1,11 @@
-from .backend import SimlarArticleBackend
+from .backend import SimilarArticleBackend
 import requests
 
 subscription_key = "96d05359d76f4e758906539daeab939e"
 search_url = "https://api.cognitive.microsoft.com/bing/v7.0/news/search"
 
 
-class BackendBing(SimlarArticleBackend):
+class BackendBing(SimilarArticleBackend):
     def __init__(self):
         self.backend_name: str = "Bing News Search API"
 
