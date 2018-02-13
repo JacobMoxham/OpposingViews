@@ -1,0 +1,1 @@
+from similar_articles.frontend import find_similar_articles

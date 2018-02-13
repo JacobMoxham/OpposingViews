@@ -1,4 +1,7 @@
 aws-python/aws.zip
-aws-python/__pycache__
 aws-python/classifiers/*.csv
-aws-python/classifiers/__pycache__
+
+# Ignore optimised/compiled files
+__pycache__/
+*.py[cod]
+
