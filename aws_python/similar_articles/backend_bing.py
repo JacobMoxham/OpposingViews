@@ -7,6 +7,7 @@ search_url = "https://api.cognitive.microsoft.com/bing/v7.0/news/search"
 
 class BackendBing(SimilarArticleBackend):
     def __init__(self):
+        super().__init__()
         self.backend_name: str = "Bing News Search API"
 
     def list_topic(self, topic):

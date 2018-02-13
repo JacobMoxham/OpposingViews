@@ -7,6 +7,7 @@ BASE_URL = "https://news.google.com/news/rss/explore/section/q/"
 
 class BackendGoogle(SimilarArticleBackend):
     def __init__(self):
+        super().__init__()
         self.backend_name = "Google RSS Feed"
 
     def get_similar_for_keywords(self, keywords):

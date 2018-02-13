@@ -18,8 +18,8 @@ def interleave(*iters):
     Given two or more iterables, return a list containing
     the elements of the input list interleaved.
 
-    >>> interleave(*[x, y])
-    [1, 9, 2, 8, 3, 7, 4, 6, 5]
+    >>> interleave([1,2,3], ['a', 'b', 'c', 'd'])
+    [1, 'a', 2, 'b', 3, 'c', 'd']
     """
     return [x for x in itertools.chain.from_iterable(itertools.zip_longest(*iters)) if x]
 
