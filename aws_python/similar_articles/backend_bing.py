@@ -1,12 +1,14 @@
 from .backend import SimlarArticleBackend
 import requests
-import sys
 
 subscription_key = "96d05359d76f4e758906539daeab939e"
 search_url = "https://api.cognitive.microsoft.com/bing/v7.0/news/search"
 
 
 class BackendBing(SimlarArticleBackend):
+    def __init__(self):
+        self.backend_name: str = "Bing News Search API"
+
     def list_topic(self, topic):
         entries = self.get_similar_for_topic(topic)
         print("Got {:d} entries".format(len(entries)))
@@ -23,14 +25,3 @@ class BackendBing(SimlarArticleBackend):
         response.raise_for_status()
         search_results = response.json()
         return [{'title':e['name'], 'url':e['url']} for e in search_results["value"]]
-
-
-if __name__ == '__main__':
-    backend = BackendBing()
-    while True:
-        print(">", end='')
-        for line in sys.stdin:
-            line = line.strip()
-            print("Searching {:s}...".format(line))
-            backend.list_topic(line)
-            print("\n\n>", end='')

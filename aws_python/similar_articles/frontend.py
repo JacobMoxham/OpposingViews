@@ -1,6 +1,5 @@
 from .backend_bing import BackendBing
 from .backend_google import BackendGoogle
-import sys
 import itertools
 
 backends = [BackendBing(), BackendGoogle()]
@@ -36,14 +35,8 @@ def find_similar_articles(keywords):
     return results
 
 
-if __name__ == '__main__':
-    print("Enter a search")
-
-    while True:
-        print(">", end='')
-        for line in sys.stdin:
-            line = line.strip()
-            keywords = line.split()
-            print("Searching {:s}...".format(line))
-            print(find_similar_articles(keywords))
-            print("\n\n>", end="")
+def get_similar_article_backend_results(keywords):
+    return [
+        dict(name=b.backend_name,
+             shortname=b.__class__.__name__,
+             results=b.get_similar_for_keywords(keywords)) for b in backends]

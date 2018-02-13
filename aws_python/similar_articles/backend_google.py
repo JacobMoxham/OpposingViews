@@ -1,12 +1,14 @@
 from .backend import SimlarArticleBackend
 import urllib.parse
 import feedparser
-import sys
 
 BASE_URL = "https://news.google.com/news/rss/explore/section/q/"
 
 
 class BackendGoogle(SimlarArticleBackend):
+    def __init__(self):
+        self.backend_name = "Google RSS Feed"
+
     def get_similar_for_keywords(self, keywords):
         return self.get_similar_for_topic(" ".join(keywords))
 
@@ -22,14 +24,3 @@ class BackendGoogle(SimlarArticleBackend):
         print("Got {:d} entries".format(len(entries)))
         for e in entries:
             print("\"{:s}\" - {:s}".format(e['title'], e['url']))
-
-
-if __name__ == '__main__':
-    backend = BackendGoogle()
-    while True:
-        print(">", end='')
-        for line in sys.stdin:
-            line = line.strip()
-            print("Searching {:s}...".format(line))
-            backend.list_topic(line)
-            print("\n\n>", end='')
