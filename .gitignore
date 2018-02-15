@@ -1,5 +1,6 @@
-aws-python/aws.zip
-aws-python/classifiers/*.csv
+aws_python/aws.zip
+aws_python/classifiers/*.csv
+*.csv
 
 # Ignore optimised/compiled files
 __pycache__/
