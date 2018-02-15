@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import urllib
-import json
 
 def lambda_handler(event, context):
     src = event['src']
