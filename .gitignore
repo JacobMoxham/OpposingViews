@@ -1,8 +1,14 @@
 aws_python/aws.zip
+aws_feedback/aws.zip
 aws_python/classifiers/*.csv
 *.csv
 
 # Ignore optimised/compiled files
 __pycache__/
 *.py[cod]
+
+# Ignore OS files
+.DS_Store
+._*
+*~
 
