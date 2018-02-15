@@ -7,7 +7,7 @@ class SimilarArticleBackend(ABC):
     """
 
     def __init__(self):
-        self.backend_name: str = NotImplementedError
+        self.backend_name = NotImplementedError
 
     @abstractmethod
     def get_similar_for_keywords(self, keywords):
