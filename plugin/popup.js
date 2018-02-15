@@ -1,8 +1,12 @@
+const DEBUG = 1
+const debug_base = "http://localhost:8080/"
 const api_base = "https://q33wccsyz5.execute-api.eu-west-1.amazonaws.com/dev/"
 
-const backendProcessingAPI = api_base + "extensionBackend";
+const debugBackendAPI = debug_base + 'get-views';
+const productionBackendAPI = api_base + "extensionBackend";
 const feedbackProcessingAPI = api_base + "feedback-processing";
 
+const backendProcessingAPI = (DEBUG ? debugBackendAPI : productionBackendAPI);
 /*
  * Creates a list of items which represents a list of suggested
  * articles as a table
@@ -60,7 +64,7 @@ function onWindowLoad() {
     chrome.tabs.sendMessage(tabs[0].id,
       {'action': 'sourceRequest', 'currURL': tabs[0].url},
       function(rtn) {
-        data = '{"src": "' + rtn.src + '", "link": "' + tabs[0].url + '"}';
+        data = 'link=' + tabs[0].url;
         
         if (rtn.prevURL) {
 			$("#feedback-request .thumbs-up").click({toLink:tabs[0].url, fromLink: rtn.prevURL, thumbsElem: $("#feedback-request")}, (ev) => {sendFeedback("positive", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);});

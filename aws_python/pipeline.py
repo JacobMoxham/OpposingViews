@@ -1,18 +1,13 @@
+#!/usr/bin/env python3
+
 from content_extraction.goose.extract_content import extract_content
 from similar_articles.frontend import find_similar_articles
 from classifiers.classifiers import classify
 from suitability_scoring.calculate_suitability import get_suitable_articles
 
-from bs4 import BeautifulSoup
 import urllib
 
-def lambda_handler(event, context):
-    url = event['link']
-    return pipeline_test(url)
-
-
 def test(event):
-    soup = BeautifulSoup(urllib.parse.unquote(src), 'html.parser')
     return [{"link": "http://www.bbc.co.uk/news/uk-politics-42929071",
              "imageLink": "https://ichef.bbci.co.uk/news/320/cpsprodpb/AFA4/production/_99746944_gettyimages-531840456.jpg",
              "title": "Jacob Rees-Mogg says Treasury 'fiddling figures' on Brexit",
