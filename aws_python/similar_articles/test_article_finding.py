@@ -21,13 +21,13 @@ class TestBackends(unittest.TestCase):
 
 class TestBackendGoogle(TestBackends):
     def setUp(self):
-        self.backend: SimilarArticleBackend = BackendGoogle()
+        self.backend = BackendGoogle()
         super().setUp()
 
 
 class TestBackendBing(TestBackends):
     def setUp(self):
-        self.backend: SimilarArticleBackend = BackendBing()
+        self.backend = BackendBing()
         super().setUp()
 
 
