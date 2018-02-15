@@ -15,8 +15,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.externals import joblib
 
-from ml_utils import show_most_informative_features
-from classifier_definitions import preprocess
+from .ml_utils import show_most_informative_features
+from .classifier_definitions import preprocess
 
 
 if __name__ == '__main__':
