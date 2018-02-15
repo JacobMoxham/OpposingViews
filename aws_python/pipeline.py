@@ -18,21 +18,30 @@ def test(event):
              "summary": "What was the point of banning Russia from the Winter Olympics when 169 of their athletes are still being allowed to compete as neutrals? "}]
 
 def pipeline_test(passed_url):
+    # extract content of passed url
     article = extract_content(passed_url)
+    # find similar articles based on keywords
     similar_articles = find_similar_articles(article.meta_keywords)
+    # run heuristics on initial article
     initial_heuristics = classify({'text': article.cleaned_text})
 
+
+    # run heuristics on each similar article
     comparison_heuristics_list = []
     for entry in similar_articles:
         try:
             url = entry['url']
             comparison_article = extract_content(url)
             comparison_heuristics = classify({'text': comparison_article.cleaned_text})
-            comparison_heuristics_list.append(({'article': article, 'url': url}, comparison_heuristics))
+            comparison_heuristics_list.append(({'article': comparison_article, 'url': url}, comparison_heuristics))
         except:
-            print(url)
+            print('error extracting:', url)
 
+    # run suitability calculations
     suitable_articles = get_suitable_articles(initial_heuristics, comparison_heuristics_list)[:3]
+
+
+    # format for sending to plugin
     articles_to_return = []
     for article, _ in suitable_articles:
         ret_article = {"link": article['url'],
@@ -41,4 +50,5 @@ def pipeline_test(passed_url):
                        "summary": article['article'].cleaned_text[:100]}
         articles_to_return.append(ret_article)
 
+    # return 3 suitable articles
     return articles_to_return
