@@ -1,19 +1,13 @@
-from aws_python.content_extraction.goose.extract_content import extract_content
-from aws_python.similar_articles.frontend import find_similar_articles
-from aws_python.classifiers.classifiers import classify
-from aws_python.suitability_scoring.calculate_suitability import get_suitable_articles
+#!/usr/bin/env python3
 
-from bs4 import BeautifulSoup
+from content_extraction.goose.extract_content import extract_content
+from similar_articles.frontend import find_similar_articles
+from classifiers.classifiers import classify
+from suitability_scoring.calculate_suitability import get_suitable_articles
+
 import urllib
 
-def lambda_handler(event, context):
-    src = event['src']
-    return pipeline_test(urllib.parse.unquote(src))
-
-
 def test(event):
-    src = event['src']
-    soup = BeautifulSoup(urllib.parse.unquote(src), 'html.parser')
     return [{"link": "http://www.bbc.co.uk/news/uk-politics-42929071",
              "imageLink": "https://ichef.bbci.co.uk/news/320/cpsprodpb/AFA4/production/_99746944_gettyimages-531840456.jpg",
              "title": "Jacob Rees-Mogg says Treasury 'fiddling figures' on Brexit",
