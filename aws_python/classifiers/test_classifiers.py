@@ -1,6 +1,6 @@
 import unittest
 
-import classifiers
+from . import classifiers
 
 
 class TestClassifiers(unittest.TestCase):

@@ -9,7 +9,7 @@ import logging
 import numpy as np
 from sklearn.externals import joblib
 
-from classifier_definitions import preprocess    # noqa: F401 (for flake8 linter)
+from .classifier_definitions import preprocess    # noqa: F401 (for flake8 linter)
 
 # by default, classifer names are '<heuristic>_clf.pkl', CLASSIFER_FILENAMES contains any that don't follow that pattern
 CLASSIFIER_FILENAMES = {}
