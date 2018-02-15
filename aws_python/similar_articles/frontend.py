@@ -1,6 +1,5 @@
 from .backend_bing import BackendBing
 from .backend_google import BackendGoogle
-import sys
 import itertools
 
 backends = [BackendBing(), BackendGoogle()]
@@ -19,8 +18,8 @@ def interleave(*iters):
     Given two or more iterables, return a list containing
     the elements of the input list interleaved.
 
-    >>> interleave(*[x, y])
-    [1, 9, 2, 8, 3, 7, 4, 6, 5]
+    >>> interleave([1,2,3], ['a', 'b', 'c', 'd'])
+    [1, 'a', 2, 'b', 3, 'c', 'd']
     """
     return [x for x in itertools.chain.from_iterable(itertools.zip_longest(*iters)) if x]
 
@@ -36,14 +35,8 @@ def find_similar_articles(keywords):
     return results
 
 
-if __name__ == '__main__':
-    print("Enter a search")
-
-    while True:
-        print(">", end='')
-        for line in sys.stdin:
-            line = line.strip()
-            keywords = line.split()
-            print("Searching {:s}...".format(line))
-            print(find_similar_articles(keywords))
-            print("\n\n>", end="")
+def get_similar_article_backend_results(keywords):
+    return [
+        dict(name=b.backend_name,
+             shortname=b.__class__.__name__,
+             results=b.get_similar_for_keywords(keywords)) for b in backends]
