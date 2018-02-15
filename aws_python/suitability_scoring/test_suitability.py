@@ -24,7 +24,11 @@ print("Single article suitability calculation: ", cs.calculate_suitability(inita
                                ['sentiment', 'source_politics', 'opinion_strength', 'seriousness']))
 print("")
 
-articles = [("article", test) for test in test_heuristics]
+articles = []
+i = 0
+for test in test_heuristics:
+    articles.append(("article" + str(i), test))
+    i+=1
 
 print("Muti article suitability calculation, all heuristics: ", cs.get_suitable_articles(inital_heuristics1, articles))
 print("")
