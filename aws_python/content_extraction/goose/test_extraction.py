@@ -14,10 +14,12 @@ articles = [extract_content(url) for url in urls]
 for article in articles:
     auth = article.authors
     text = article.cleaned_text
+    keywords = article.meta_keywords
     #im = article.top_image
     title = article.title
 
     print("Title: ", title)
     print("Author: ", auth)
-    print("Cleaned text: ", text)
+    print("Keywords: ", keywords)
+    print("Cleaned text, 100 chars: ", text[:100])
     print("\n")
