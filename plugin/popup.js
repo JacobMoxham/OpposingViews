@@ -62,23 +62,19 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
 
 
 function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true },
-        function(tabs) {
-            data = '{"from": "' + fromLink + '", "to": "' + suggestedArticleLink + '", "feedback": "' + feedback + '"}';
-            data = {
-                "from": fromLink,
-                "to": suggestedArticleLink,
-                "feedback": feedback
-            };
+    const requestData = {
+        "from": fromLink,
+        "to": suggestedArticleLink,
+        "feedback": feedback
+    };
 
-            $.post(feedbackProcessingAPI, requestData)
-            .done((res) => {
-                    alert(JSON.parse(res).message);
-                    thumbsElem.hide();
-            }).fail((jqXHR, textStatus, errorThrown) => {
-                    $(document.body).text(`Failed to submit feedback: ${textStatus}`);
-            });
-        });
+    $.post(feedbackProcessingAPI, requestData)
+    .done((res) => {
+            alert(JSON.parse(res).message);
+            thumbsElem.hide();
+    }).fail((jqXHR, textStatus, errorThrown) => {
+            $(document.body).text(`Failed to submit feedback: ${textStatus}`);
+    });
 }
 
 
