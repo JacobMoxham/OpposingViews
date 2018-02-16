@@ -19,6 +19,7 @@ def test(event):
              "summary": "What was the point of banning Russia from the Winter Olympics when 169 of their athletes are still being allowed to compete as neutrals? "}]
 
 def pipeline_test(passed_url):
+    print("Got article suggestions request for URL '{:s}'".format(passed_url))
     #TODO: Use proper logger
     start_time = time.time()
 
@@ -27,9 +28,13 @@ def pipeline_test(passed_url):
     extraction_time = time.time()
     print("Extracting content from article took " + str(extraction_time - start_time) + " seconds")
     
+    article_keywords = article.meta_keywords
+    print("Keywords: {:s}".format(", ".join(article_keywords)))
+
     # find similar articles based on keywords
-    similar_articles = find_similar_articles(article.meta_keywords)
+    similar_articles = find_similar_articles(article_keywords)
     similar_article_time = time.time()
+    print("Similar articles:\n\t{:s}".format("\n\t".join([a["title"] for a in similar_articles])))
     print("Finding similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
     # run heuristics on initial article
@@ -53,6 +58,7 @@ def pipeline_test(passed_url):
 
     # run suitability calculations
     suitable_articles = get_suitable_articles(initial_heuristics, comparison_heuristics_list)[:3]
+    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['article'].title for a,_ in suitable_articles])))
     suitability_calculation_time = time.time()
     print("Running suitability calculations took " + str(suitability_calculation_time - comparasion_heuristic_time) + " seconds")
 
