@@ -28,7 +28,7 @@ def pipeline_test(passed_url):
     print("Extracting content from article took " + str(extraction_time - start_time) + " seconds")
     
     # find similar articles based on keywords
-    similar_articles = find_similar_articles(article.meta_keywords)
+    similar_articles = find_similar_articles(article.meta_keywords.split(","))
     similar_article_time = time.time()
     print("Finding similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
