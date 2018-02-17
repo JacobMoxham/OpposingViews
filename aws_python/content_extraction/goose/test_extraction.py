@@ -1,4 +1,4 @@
-from content_extraction.goose.extract_content import extract_content
+from content_extraction.goose.extract_content_goose import ExtractContentGoose
 
 urls = [
     "http://www.bbc.co.uk/news/uk-politics-42867668",
@@ -9,17 +9,17 @@ urls = [
     "https://www.nbcnews.com/politics/donald-trump/trump-s-gripes-against-mccabe-included-wife-s-politics-comey-n842161"
 ]
 
-articles = [extract_content(url) for url in urls]
+g = ExtractContentGoose()
+
+articles = [g.extract_content(url) for url in urls]
 
 for article in articles:
-    auth = article.authors
-    text = article.cleaned_text
-    keywords = article.meta_keywords
+    text = article['text']
+    keywords = article['keywords']
     #im = article.top_image
-    title = article.title
+    title = article['title']
 
     print("Title: ", title)
-    print("Author: ", auth)
     print("Keywords: ", keywords)
     print("Cleaned text, 100 chars: ", text[:100])
     print("\n")
