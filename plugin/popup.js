@@ -29,7 +29,7 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
             previousLink: currentArticleURL
         }, (ev) => {
             var keyval = {};
-            keyval[ev.data.link] = ev.data.previousLink;
+            keyval[ev.data.link + 'prevURL'] = ev.data.previousLink;
             chrome.storage.local.set(keyval, () => {
                 chrome.tabs.create({ url: ev.data.link });
             });
@@ -85,43 +85,74 @@ function onExtensionWindowLoad() {
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         const currentTab = tabs[0];
         const currentURL = currentTab.url;
-        chrome.tabs.sendMessage(currentTab.id, {
-                'action': 'sourceRequest',
-                'currURL': currentURL
-            }, function(rtn) {
-                if (rtn.prevURL) {
-                    $("#feedback-request .thumbs-up").click({
-                        toLink: currentURL,
-                        fromLink: rtn.prevURL,
-                        thumbsElem: $("#feedback-request")
-                    }, (ev) => {
-                        sendFeedback("positive", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);
-                    });
+        
+        handleCurrentPageFeedbackButtons(currentTab, currentURL);
 
-                    $("#feedback-request .thumbs-down").click({
-                        toLink: currentURL,
-                        fromLink: rtn.prevURL,
-                        thumbsElem: $("#feedback-request")
-                    }, (ev) => {
-                        sendFeedback("negative", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);
-                    });
-
-                    $("#feedback-request").show();
+        var cachedDataKey = currentURL + 'cache';
+        console.log('Looking for stored item with key ' + cachedDataKey);
+        chrome.storage.local.get(cachedDataKey,
+            (items) => {
+                if (items[cachedDataKey]) {
+                    console.log('Cache hit');
+                    createSuggestedArticleTable(
+                        items[cachedDataKey], 
+                        currentURL
+                    );
                 }
-
-                const requestData = {
-                    'link': currentURL
-                };
-                $.post(backendProcessingAPI, requestData)
-                .done((res) => {
-                    createSuggestedArticleTable(JSON.parse(res), currentURL);
-                    $("#suggested-article-list").show();
-                })
-                .fail((jqXHR, textStatus, errorThrown) => {
-                    $(document.body).text(`Failed to find suggested articles: ${textStatus}`);
-                });
-            });
+                else {
+                    console.log('Cache miss');
+                    getSuggestedArticleList(currentURL, cachedDataKey);
+                }
+                $("#suggested-article-list").show();
+            }
+        );
     });
+
+}
+
+function handleCurrentPageFeedbackButtons(currentTab, currentURL) {
+    chrome.tabs.sendMessage(currentTab.id, {
+        'action': 'sourceRequest',
+        'currURL': currentURL
+    }, function(rtn) {
+        if (rtn.prevURL) {
+            $("#feedback-request .thumbs-up").click({
+                toLink: currentURL,
+                fromLink: rtn.prevURL,
+                thumbsElem: $("#feedback-request")
+            }, (ev) => {
+                sendFeedback("positive", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);
+            });
+
+            $("#feedback-request .thumbs-down").click({
+                toLink: currentURL,
+                fromLink: rtn.prevURL,
+                thumbsElem: $("#feedback-request")
+            }, (ev) => {
+                sendFeedback("negative", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);
+            });
+
+            $("#feedback-request").show();
+        }
+    });
+}
+
+function getSuggestedArticleList(currentURL, cachedDataKey) {
+        const requestData = {
+            'link': currentURL
+        };
+        $.post(backendProcessingAPI, requestData)
+        .done((res) => {
+            console.log('Storing result to cache');
+            console.log('Key is ' + cachedDataKey);
+            var keyval = {}
+            keyval[cachedDataKey] = JSON.parse(res);
+            chrome.storage.local.set(keyval);
+            createSuggestedArticleTable(JSON.parse(res), currentURL);
+        })
+        .fail((jqXHR, textStatus, errorThrown) => {
+            $(document.body).text(`Failed to find suggested articles: ${textStatus}`);
+        });
 }
 
 
