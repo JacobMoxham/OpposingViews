@@ -8,6 +8,7 @@ const feedbackProcessingAPI = api_base + "feedback-processing";
 
 const backendProcessingAPI = (DEBUG ? debug_base : api_base) + 'get-views';
 
+const CACHE_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
 
 /*
  * Creates a list of items which represents a list of suggested
@@ -18,9 +19,6 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
         var suggestedArticle = suggestedArticles[i];
 
         // Take an element from the prototype and add the article-specific parameters to it
-        console.log('Obtaining table row for article with URL' +
-        suggestedArticle.link);
-
         var item = $(".list-element-row:first").clone()
 
         item.find(".list-element-image img").attr("src", suggestedArticle.imageLink);
@@ -94,18 +92,21 @@ function onExtensionWindowLoad() {
         handleCurrentPageFeedbackButtons(currentTab, currentURL);
 
         var cachedDataKey = currentURL + 'cache';
-        console.log('Looking for stored item with key ' + cachedDataKey);
+        console.log('Looking for item in cache');
         chrome.storage.local.get(cachedDataKey,
             (items) => {
-                if (items[cachedDataKey]) {
+                if (items[cachedDataKey] && items[cachedDataKey].timeout > (new Date()).getTime()) {
                     console.log('Cache hit');
                     createSuggestedArticleTable(
-                        items[cachedDataKey], 
+                        items[cachedDataKey].res, 
                         currentURL
                     );
                 }
                 else {
-                    console.log('Cache miss');
+                    if (items[cachedDataKey])
+                        console.log('Cache hit, but timeout');
+                    else
+                        console.log('Cache miss');
                     getSuggestedArticleList(currentURL, cachedDataKey);
                 }
             }
@@ -155,14 +156,20 @@ function getSuggestedArticleList(currentURL, cachedDataKey) {
         const requestData = {
             'link': currentURL
         };
+        console.log("using url " + currentURL);
         $.post(backendProcessingAPI, requestData)
         .done((res) => {
+
+            res = JSON.parse(res);
+
             console.log('Storing result to cache');
-            console.log('Key is ' + cachedDataKey);
-            var keyval = {}
-            keyval[cachedDataKey] = JSON.parse(res);
+            
+            cachedResult = {'res' : res , 'timeout' : ((new Date()).getTime() + CACHE_TIMEOUT)};
+            var keyval = {};
+            keyval[cachedDataKey] = cachedResult;
             chrome.storage.local.set(keyval);
-            createSuggestedArticleTable(JSON.parse(res), currentURL);
+
+            createSuggestedArticleTable(res, currentURL);
         })
         .fail((jqXHR, textStatus, errorThrown) => {
             $("#suggested-article-loading-status").text(`Failed to find suggested articles: ${textStatus}`);
