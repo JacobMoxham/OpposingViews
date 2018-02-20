@@ -14,7 +14,7 @@ h1 {
 }
 
 #container div {
-  float: left;
+  float: none;
   position: relative;
   left: 0em;
   top: 0em;
