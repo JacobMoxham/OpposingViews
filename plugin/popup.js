@@ -1,12 +1,12 @@
 const DEBUG = 1
 const debug_base = "http://localhost:8080/"
-const api_base = "https://q33wccsyz5.execute-api.eu-west-1.amazonaws.com/dev/"
+const api_base = "http://ec2-34-240-199-221.eu-west-1.compute.amazonaws.com:8080/"
 
 const debugBackendAPI = debug_base + 'get-views';
 const productionBackendAPI = api_base + "extensionBackend";
 const feedbackProcessingAPI = api_base + "feedback-processing";
 
-const backendProcessingAPI = (DEBUG ? debugBackendAPI : productionBackendAPI);
+const backendProcessingAPI = (DEBUG ? debug_base : api_base) + 'get-views';
 
 
 /*
@@ -18,6 +18,9 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
         var suggestedArticle = suggestedArticles[i];
 
         // Take an element from the prototype and add the article-specific parameters to it
+        console.log('Obtaining table row for article with URL' +
+        suggestedArticle.link);
+
         var item = $(".list-element-row:first").clone()
 
         item.find(".list-element-image img").attr("src", suggestedArticle.imageLink);
@@ -28,8 +31,9 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
             link: suggestedArticle.link,
             previousLink: currentArticleURL
         }, (ev) => {
+            var key = ev.data.link + 'prevURL'
             var keyval = {};
-            keyval[ev.data.link + 'prevURL'] = ev.data.previousLink;
+            keyval[key] = ev.data.previousLink;
             chrome.storage.local.set(keyval, () => {
                 chrome.tabs.create({ url: ev.data.link });
             });
@@ -58,6 +62,8 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
 
     // Now remove the prototype as we don't need it
     $(".list-element-row:first").remove();
+    $('.display-suggested-articles').show();
+    $('#suggested-article-loading-status').hide();
 }
 
 
@@ -73,14 +79,13 @@ function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
             alert(JSON.parse(res).message);
             thumbsElem.hide();
     }).fail((jqXHR, textStatus, errorThrown) => {
-            $(document.body).text(`Failed to submit feedback: ${textStatus}`);
+            $("#suggested-article-loading-status").text(`Failed to submit feedback: ${textStatus}`);
     });
 }
 
 
 function onExtensionWindowLoad() {
-    $("#suggested-article-list").hide();
-    $("#feedback-request").hide();
+    $(".display-suggested-articles").hide();
 
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         const currentTab = tabs[0];
@@ -103,7 +108,6 @@ function onExtensionWindowLoad() {
                     console.log('Cache miss');
                     getSuggestedArticleList(currentURL, cachedDataKey);
                 }
-                $("#suggested-article-list").show();
             }
         );
     });
@@ -111,11 +115,16 @@ function onExtensionWindowLoad() {
 }
 
 function handleCurrentPageFeedbackButtons(currentTab, currentURL) {
+    $('#feedback-request').hide();
+
     chrome.tabs.sendMessage(currentTab.id, {
-        'action': 'sourceRequest',
-        'currURL': currentURL
+        'action': 'previousURLRequest'
     }, function(rtn) {
-        if (rtn.prevURL) {
+        if (rtn && rtn.prevURL) {
+            console.log("Found previous URL, showing feedback thumbs...");
+
+            $("#feedback-request").show();
+
             $("#feedback-request .thumbs-up").click({
                 toLink: currentURL,
                 fromLink: rtn.prevURL,
@@ -132,7 +141,12 @@ function handleCurrentPageFeedbackButtons(currentTab, currentURL) {
                 sendFeedback("negative", ev.data.fromLink, ev.data.toLink, ev.data.thumbsElem);
             });
 
-            $("#feedback-request").show();
+        }
+        else if (!rtn) {
+            console.log("Did you load the extension before the webpage?");
+        }
+        else {
+            console.log("Could not find previous URL");
         }
     });
 }
@@ -151,7 +165,7 @@ function getSuggestedArticleList(currentURL, cachedDataKey) {
             createSuggestedArticleTable(JSON.parse(res), currentURL);
         })
         .fail((jqXHR, textStatus, errorThrown) => {
-            $(document.body).text(`Failed to find suggested articles: ${textStatus}`);
+            $("#suggested-article-loading-status").text(`Failed to find suggested articles: ${textStatus}`);
         });
 }
 
