@@ -17,7 +17,7 @@ cleandep:
 	$(if -r lib64, rm -r lib64)
 
 clean:
-	$(if -f $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
+	$(if -r $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
 
 cleanall:
 	$(MAKE) cleandep

@@ -2,11 +2,9 @@ const DEBUG = 1
 const debug_base = "http://localhost:8080/"
 const api_base = "http://ec2-34-240-199-221.eu-west-1.compute.amazonaws.com:8080/"
 
-const debugBackendAPI = debug_base + 'get-views';
-const productionBackendAPI = api_base + "extensionBackend";
-const feedbackProcessingAPI = api_base + "feedback-processing";
-
+const feedbackProcessingAPI = (DEBUG ? debug_base : api_base) + 'feedback-processing';
 const backendProcessingAPI = (DEBUG ? debug_base : api_base) + 'get-views';
+
 
 const CACHE_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
 
@@ -66,12 +64,14 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
 
 
 function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
+    
     const requestData = {
-        "from": fromLink,
-        "to": suggestedArticleLink,
+        "fromSite": fromLink,
+        "toSite": suggestedArticleLink,
         "feedback": feedback
     };
 
+    console.log(requestData);
     $.post(feedbackProcessingAPI, requestData)
     .done((res) => {
             alert(JSON.parse(res).message);
@@ -153,9 +153,11 @@ function handleCurrentPageFeedbackButtons(currentTab, currentURL) {
 }
 
 function getSuggestedArticleList(currentURL, cachedDataKey) {
+        
         const requestData = {
             'link': currentURL
         };
+
         console.log("using url " + currentURL);
         $.post(backendProcessingAPI, requestData)
         .done((res) => {
