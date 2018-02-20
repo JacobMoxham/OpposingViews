@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from content_extraction.goose.extract_content import extract_content
+from content_extraction.extract_content import extract_content
 from similar_articles.frontend import find_similar_articles
 from classifiers.classifiers import classify
 from suitability_scoring.calculate_suitability import get_suitable_articles
@@ -29,7 +29,7 @@ def pipeline_test(passed_url):
     extraction_time = time.time()
     print("Extracting content from article took " + str(extraction_time - start_time) + " seconds")
     
-    article_keywords = article.meta_keywords
+    article_keywords = article['keywords']
     print("Keywords: {:s}".format(", ".join(article_keywords)))
 
     # find similar articles based on keywords
@@ -61,6 +61,7 @@ def pipeline_test(passed_url):
         initial_heuristic_time = time.time()
         print("Got cached initial heuristics, took " + str(initial_heuristic_time - similar_article_time) + " seconds")
 
+
     # run heuristics on each similar article
     comparison_heuristics_list = []
     for entry in similar_articles:
@@ -73,6 +74,7 @@ def pipeline_test(passed_url):
 
             # TODO: consider caching this info
             comparison_article = extract_content(url)
+            
             if cached_article is None:
                 # run heuristics
                 comparison_heuristics = classify({'text': comparison_article.cleaned_text})
@@ -92,17 +94,18 @@ def pipeline_test(passed_url):
 
     # run suitability calculations
     suitable_articles = get_suitable_articles(initial_heuristics, comparison_heuristics_list)[:3]
-    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['article'].title for a,_ in suitable_articles])))
+    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['title'] for a,_ in suitable_articles])))
     suitability_calculation_time = time.time()
     print("Running suitability calculations took " + str(suitability_calculation_time - comparasion_heuristic_time) + " seconds")
 
     # format for sending to plugin
     articles_to_return = []
-    for article, _ in suitable_articles:
-        ret_article = {"link": article['url'],
+    for suitable_article, _ in suitable_articles:
+        ret_article = {"link": suitable_article['url'],
                        "imageLink": "",
-                       "title": article['article'].title,
-                       "summary": article['article'].cleaned_text[:100]}
+                       "title": suitable_article['title'],
+                       "summary": '%s%s' % (suitable_article['text'][:100], '...')
+                       }
         articles_to_return.append(ret_article)
 
     # return 3 suitable articles

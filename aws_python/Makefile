@@ -1,19 +1,38 @@
-BUILDDIR = .deploy
+PACKAGENAME=aws_python_test
+REMOTEUSER=ubuntu
+REMOTE=ec2-34-240-199-221.eu-west-1.compute.amazonaws.com
 
-all:
+$(PACKAGENAME).zip:
 	#create zip package to upload to AWS
-	mkdir -p $(BUILDDIR)
-	cp -r * $(BUILDDIR)
-	cd $(BUILDDIR); pip3 install -t . -r requirements.txt; zip -r aws.zip *
-	cp $(BUILDDIR)/aws.zip .
+	ls | grep --invert-match --regexp="bin\|lib\|lib64" | zip -r -@ $(PACKAGENAME).zip
 
-.PHONY: deploy
-deploy:
-	$(if ! -f aws.zip, make all)
-	aws lambda update-function-code --function-name arn:aws:lambda:eu-west-1:285737895683:function:extensionBackend --zip-file fileb://./aws.zip
+bin lib:
+	python3 -m virtualenv .
+
+.PHONY: deploy depend start clean cleandep cleanall
+
+cleandep:
+	$(if -d bin, rm -r bin)
+	$(if -d lib, rm -r lib)
+	$(if -r lib64, rm -r lib64)
 
 clean:
-	rm aws.zip
-	rm -r .deploy/
+	$(if -f $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
 
+cleanall:
+	$(MAKE) cleandep
+	$(MAKE) clean
 
+depend: bin lib
+	bash -c 'source "bin/activate" ; pip3 install -r requirements.txt ; deactivate'
+
+deploy: $(PACKAGENAME).zip
+	ssh $(REMOTEUSER)@$(REMOTE) "mkdir -p $(PACKAGENAME)"
+	scp $(PACKAGENAME).zip "$(REMOTEUSER)@$(REMOTE):$(PACKAGENAME)/"
+	ssh $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip; $(MAKE) start"
+
+start:
+	$(MAKE) depend
+	killall -q python3 ; echo 1
+	bash -c 'source "bin/activate" ; ./server.py & '
+	#At this point is is safe to Ctrl-C if necessary
