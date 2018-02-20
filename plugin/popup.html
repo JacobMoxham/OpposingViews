@@ -18,11 +18,17 @@
             </p>
         </div>
 
-        <h1>Suggested Articles</h1>
 
         <!--prototype of table element layout-->
-        <div id="container">
-            <table id="suggested-article-list">
+            <h1 class='display-suggested-articles'>
+                Suggested Articles
+            </h1>
+            <p class='display-suggested-articles'>
+                Given the current page you are looking at,
+                we think these articles might be interesting:
+            </p>
+            <table id="suggested-article-list"
+                class='display-suggested-articles'>
                 <tr class="list-element-row">
                     <td>
                         <table class="list-element-table">
@@ -47,6 +53,8 @@
                     </td>
                 </tr>
             </table>
-        </div>
+            <p id="suggested-article-loading-status">
+                Loading suggested articles....
+            </p>
     </body>
 </html>
