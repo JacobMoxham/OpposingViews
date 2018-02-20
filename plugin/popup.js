@@ -1,9 +1,9 @@
-const DEBUG = 1
+const DEBUG = 0
 const debug_base = "http://localhost:8080/"
-const api_base = "https://q33wccsyz5.execute-api.eu-west-1.amazonaws.com/dev/"
+const api_base = "http://ec2-34-240-199-221.eu-west-1.compute.amazonaws.com:8080/";
 
 const debugBackendAPI = debug_base + 'get-views';
-const productionBackendAPI = api_base + "extensionBackend";
+const productionBackendAPI = api_base + "get-views";
 const feedbackProcessingAPI = api_base + "feedback-processing";
 
 const backendProcessingAPI = (DEBUG ? debugBackendAPI : productionBackendAPI);
