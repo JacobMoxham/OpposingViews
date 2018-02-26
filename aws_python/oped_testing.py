@@ -40,11 +40,23 @@ expected = [False,
 
 words = get_newsprobs()
 
+results = []
+
+percent_correct = 0.0
+
 for x in range(0, 13):
     article = extract_content(urls[x], user_agent=USER_AGENT)
 
     print(article['title'])
     print('Expected Output')
     print(expected[x])
-    print(oped_check(article['text'], words))
+    results.append(oped_check(article['text'], words))
+    print(results[x])
+    if bool(results[x]) == bool(expected[x]):
+        percent_correct = percent_correct + 1
     print()
+
+percent_correct = float(percent_correct / 13.0)
+print('Percent Correct')
+print(percent_correct)
+

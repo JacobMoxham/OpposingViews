@@ -38,9 +38,14 @@ def get_newsprobs():
 
     for key in all_words:
         if key not in news_words:
-            all_words[key] = float(float(0.5) / float(all_words[key] + 1))
+            all_words[key] = 0
         else:
-            all_words[key] = float(float(news_words[key] + 0.5) / float(all_words[key] + 1))
+            all_words[key] = float(float(news_words[key]) / float(all_words[key]))
+
+        if all_words[key] > 0.5:
+            all_words[key] = all_words[key] - (all_words[key] - 0.5)*0.2
+        elif all_words[key] < 0.5:
+            all_words[key] = all_words[key] + (0.5 - all_words[key])*0.2
 
     return all_words
 
@@ -67,5 +72,9 @@ def oped_check(text, words):
     print('Oped score:')
     print(proboped - probnews)
     print('Received Output')
-    return proboped > probnews
+    # return proboped > probnews
+
+    # adding a fudge factor of 450
+    return proboped - 450 > probnews
+
 
