@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 PACKAGENAME=aws_python_test
 REMOTEUSER=ubuntu
 REMOTE=ec2-34-240-199-221.eu-west-1.compute.amazonaws.com
@@ -12,9 +14,10 @@ bin lib:
 .PHONY: deploy depend start clean cleandep cleanall
 
 cleandep:
-	$(if -d bin, rm -r bin)
-	$(if -d lib, rm -r lib)
-	$(if -r lib64, rm -r lib64)
+	if [ -d bin ]; then rm -r bin; fi;
+	if [ -d lib ]; then rm -r lib; fi;
+	if [ -r lib64 ]; then rm -r lib64; fi;
+	if [ -r pip-selfcheck.json ]; then rm pip-selfcheck.json; fi
 
 clean:
 	$(if -r $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
