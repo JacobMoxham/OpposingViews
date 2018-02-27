@@ -1,5 +1,6 @@
-const DEBUG = 1
+const DEBUG = 0
 const debug_base = "http://localhost:8080/"
+
 const api_base = "http://ec2-34-240-199-221.eu-west-1.compute.amazonaws.com:8080/"
 
 const feedbackProcessingAPI = (DEBUG ? debug_base : api_base) + 'feedback-processing';
