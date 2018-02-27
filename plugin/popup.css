@@ -1,27 +1,14 @@
 body {
         margin: 0.5em;
-        white-space: nowrap;
         width: 50em;
         font-family: helvetica;
       }
 h1 {
         font-size: 2em;
    }
-#container {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-}
 
-#container div {
-  float: none;
-  position: relative;
-  left: 0em;
-  top: 0em;
-}
-
-.list-element-table {
-  max-height: 6em;
+.clickable {
+    cursor: pointer;
 }
 
 .list-element-title {
@@ -34,10 +21,6 @@ h1 {
   width:auto;
 }
 
-.list-element-table td {
-  white-space: normal;
-}
-
 .feedback-thumbs {
   text-align:right;
 }
@@ -45,6 +28,7 @@ h1 {
 .feedback-thumbs img {
   padding: 0.5em;
   max-height: 2em;
+  cursor: pointer;
 }
 
 #feedback-request .feedback-thumbs {
