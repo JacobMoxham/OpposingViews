@@ -40,7 +40,15 @@ def classify_list(articles):
     for i in range(len(texts)):
         p = politicses[i]
         t = tones[i][0] #Represents probability of neutrality
-        result.append({'source_politics' : p, 'source_tone' : t, 'positivity' : sentiments[i]['positive'], 'negativity' : sentiments[i]['negative']})
+        positivity =  sentiments[i]['positive']
+        negativity =  sentiments[i]['negative']
+        sentiment = (positivity + 1 - negativity) / 2
+        result.append( {'source_politics' : p, 
+                        'source_tone' : t, 
+                        'source_positivity' : positivity,
+                        'source_negativity' : negativity,
+                        'source_sentiment' : sentiment
+                        })
     return result
 
 
