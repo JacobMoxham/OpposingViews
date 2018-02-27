@@ -1,13 +1,12 @@
-from keyword_extraction.extract_keywords import keywords
+from opinionpiece_analysis.oped import get_newsprobs
+from opinionpiece_analysis.oped import oped_check
 from content_extraction.extract_content import extract_content
-from keyword_extraction.tfidf import get_idf
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
 
 urls = ["http://www.bbc.co.uk/news/uk-politics-42867668",
         "http://www.dailymail.co.uk/tvshowbiz/article-5328767/Kim-Kardashian-hits-cultural-appropriation.html",
-        #"https://www.theguardian.com/lifeandstyle/2012/sep/07/kim-kardashian-life-as-brand",
-        "https://www.hellomagazine.com/tags/kim-kardashian/",
+        "https://www.theguardian.com/lifeandstyle/2012/sep/07/kim-kardashian-life-as-brand",
         "https://www.vanityfair.com/news/2017/12/donald-trump-wines",
         "https://www.nbcnews.com/politics/donald-trump/trump-s-gripes-against-mccabe-included-wife-s-politics-comey-n842161",
         'http://edition.cnn.com/2012/02/22/world/europe/uk-occupy-london/index.html?hpt=ieu_c2',
@@ -22,18 +21,42 @@ urls = ["http://www.bbc.co.uk/news/uk-politics-42867668",
         'https://www.theguardian.com/commentisfree/2015/oct/30/indonesia-fires-disaster-21st-century-world-media',
         ]
 
-# idf, iwi = get_idf()
+expected = [False,
+            False,
+            True,
+            True,
+            True,
+            False,
+            True,
+            True,
+            # True,
+            False,
+            False,
+            True,
+            False,
+            # True,
+            True,
+        ]
 
-for url in urls:
-    article = extract_content(url, user_agent=USER_AGENT)
+words = get_newsprobs()
+
+results = []
+
+percent_correct = 0.0
+
+for x in range(0, 13):
+    article = extract_content(urls[x], user_agent=USER_AGENT)
 
     print(article['title'])
-    print('Simple')
-    print(keywords(article['title'], article['text'], n=5, ipl=2))
-    print('Weighted')
-    print(keywords(article['title'], article['text'], n=5, ipl=3))
-    print('Rlms Method')
-    print(keywords(article['title'], article['text'], n=5, ipl=1))
-    # print('+Metadata')
-    # print(keywords(article['title'], article['text'], n=5))
+    print('Expected Output')
+    print(expected[x])
+    results.append(oped_check(article['text'], words))
+    print(results[x])
+    if bool(results[x]) == bool(expected[x]):
+        percent_correct = percent_correct + 1
     print()
+
+percent_correct = float(percent_correct / 13.0)
+print('Percent Correct')
+print(percent_correct)
+
