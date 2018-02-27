@@ -38,7 +38,7 @@ def classify_list(articles):
     sentiments = sentiment_classifier.classify_all(sentiment_data, texts)
     result = []
     for i in range(len(texts)):
-        p = politicses[i]
+        p = float(politicses[i])
         t = tones[i][0] #Represents probability of neutrality
         positivity =  sentiments[i]['positive']
         negativity =  sentiments[i]['negative']
