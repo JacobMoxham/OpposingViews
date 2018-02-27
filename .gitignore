@@ -1,6 +1,7 @@
 aws_python/aws.zip
 aws_feedback/aws.zip
 aws_python/classifiers/*.csv
+aws_python/classifiers/*.pkl
 aws_python/.deploy
 *.csv
 
@@ -12,4 +13,6 @@ __pycache__/
 .DS_Store
 ._*
 *~
+
+machine_learning_research/data
 
