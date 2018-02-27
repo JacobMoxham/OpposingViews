@@ -1,11 +1,10 @@
-const DEBUG = 0
-const debug_base = "http://localhost:8080/"
+const DEBUG = 0;
+const api_base_debug = "http://localhost:8080/";
+const api_base_production = "https://opposingviews.media/api/"
+const api_base = DEBUG ? api_base_debug : api_base_production;
 
-const api_base = "http://ec2-34-240-199-221.eu-west-1.compute.amazonaws.com:8080/"
-
-const feedbackProcessingAPI = (DEBUG ? debug_base : api_base) + 'feedback-processing';
-const backendProcessingAPI = (DEBUG ? debug_base : api_base) + 'get-views';
-
+const feedbackProcessingAPI = api_base + 'feedback-processing';
+const backendProcessingAPI = api_base + 'get-views';
 
 const CACHE_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
 
