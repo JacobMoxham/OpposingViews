@@ -1,24 +1,24 @@
 import mongo.database_access as mongo
 
-# Create test document
+# create test document
 url = "test url"
 heuristic = {'sentiment': 0.7, 'source_politics': 0.1, 'opinion_strength': 0.5, 'seriousness': 0.3}
 
-# Get db instance
-db = mongo.get_heuristics_database()
+# get db instance
+db = mongo.HeuristicsDB()
 
-# Write the article to the database
-mongo.write_article(db, url, heuristic)
+# write the article to the database
+db.write_article(url, heuristic)
 
-# Read it back
-article = mongo.read_article(db, url)
+# read it back
+article = db.read_article(url)
 
-# Print article
+# print article
 print(article)
 assert(article['url'] == url)
 assert(article['heuristics'] == heuristic)
 
-#Try reading a url we have no entry for
-empty = mongo.read_article(db, "")
-print("Is result for url with no article none? :", empty == None)
-assert(empty == None)
+# try reading a url we have no entry for
+empty = db.read_article("")
+print("Is result for url with no article none? :", empty is None)
+assert(empty is None)

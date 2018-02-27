@@ -16,6 +16,7 @@ CLASSIFIER_FILENAMES = {}
 
 try:
     politics = joblib.load('politics_clf.pkl')
+    tone = joblib.load('classifiers/tone_clf.pkl')
 except FileNotFoundError as e:
     logging.error("Could not locate classifier '{}'".format(e.filename))
     sys.exit()
@@ -30,7 +31,14 @@ def classify_list(articles):
     """
     texts = np.array([a['text'] for a in articles])
     politicses = politics.predict(texts)
-    return [{'source_politics': p} for p in politicses]
+    tones = tone.predict_proba(texts)
+
+    result = []
+    for i in range(len(texts)):
+        p = politicses[i]
+        t = tones[i][0] #Represents probability of neutrality
+        result.append({'source_politics' : p, 'source_tone' : t})
+    return result
 
 
 def classify(article):
