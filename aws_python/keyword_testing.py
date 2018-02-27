@@ -6,7 +6,7 @@ USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36
 
 urls = ["http://www.bbc.co.uk/news/uk-politics-42867668",
         "http://www.dailymail.co.uk/tvshowbiz/article-5328767/Kim-Kardashian-hits-cultural-appropriation.html",
-        "https://www.theguardian.com/lifeandstyle/2012/sep/07/kim-kardashian-life-as-brand",
+        #"https://www.theguardian.com/lifeandstyle/2012/sep/07/kim-kardashian-life-as-brand",
         "https://www.hellomagazine.com/tags/kim-kardashian/",
         "https://www.vanityfair.com/news/2017/12/donald-trump-wines",
         "https://www.nbcnews.com/politics/donald-trump/trump-s-gripes-against-mccabe-included-wife-s-politics-comey-n842161",
@@ -22,18 +22,18 @@ urls = ["http://www.bbc.co.uk/news/uk-politics-42867668",
         'https://www.theguardian.com/commentisfree/2015/oct/30/indonesia-fires-disaster-21st-century-world-media',
         ]
 
-idf, iwi = get_idf()
+# idf, iwi = get_idf()
 
 for url in urls:
     article = extract_content(url, user_agent=USER_AGENT)
 
     print(article['title'])
     print('Simple')
-    print(keywords(article['title'], article['text'], idf, iwi, n=5, ipl=2))
+    print(keywords(article['title'], article['text'], n=5, ipl=2))
     print('Weighted')
-    print(keywords(article['title'], article['text'], idf, iwi, n=5, ipl=3))
+    print(keywords(article['title'], article['text'], n=5, ipl=3))
     print('Rlms Method')
-    print(keywords(article['title'], article['text'], idf, iwi, n=5, ipl=1))
+    print(keywords(article['title'], article['text'], n=5, ipl=1))
     # print('+Metadata')
     # print(keywords(article['title'], article['text'], n=5))
     print()

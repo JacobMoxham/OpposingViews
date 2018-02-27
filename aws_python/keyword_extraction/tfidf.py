@@ -4,6 +4,8 @@ from nltk.corpus import stopwords
 from nltk import word_tokenize
 from string import punctuation
 from collections import Counter
+import json
+
 # from goose3 import Goose
 
 # url = 'http://edition.cnn.com/2012/02/22/world/europe/uk-occupy-london/index.html?hpt=ieu_c2'
@@ -35,23 +37,33 @@ def get_idf():
         indexes = [internal_word_index[word] for word in words]
         word_idf[indexes] += 1.0
 
-    return np.log(doc_count / (1 + word_idf).astype(float)), internal_word_index
+    # return np.log(doc_count / (1 + word_idf).astype(float)), internal_word_index
+
+    word_idf = np.log(doc_count / (1 + word_idf).astype(float))
+
+    idf_dict = {}
+    for i in range(len(vocabulary)):
+        idf_dict[vocabulary[i]] = word_idf[i]
+
+    with open('reuters_idf.json', 'w') as f:
+        json.dump(idf_dict, f)
 
 
-def tfidf(text, word_idf, iwi):
+def tfidf(text, word_idf):
     text = tokenize(text)
     length = len(text)
     tfidf = Counter(text)
 
     for key in tfidf:
-        if key not in iwi:
+        if key not in word_idf:
             tfidf[key] = float(tfidf[key]) * 13 / length
         else:
-            tfidf[key] = float(tfidf[key]) * word_idf[iwi[key]] / length
+            tfidf[key] = float(tfidf[key]) * word_idf[key] / length
 
     return tfidf
 
-def tfidf_weighted(text, word_idf, iwi):
+
+def tfidf_weighted(text, word_idf):
     text = tokenize(text)
     length = len(text)
 
@@ -64,22 +76,22 @@ def tfidf_weighted(text, word_idf, iwi):
     tfidf3 = Counter(end)
 
     for key in tfidf1:
-        if key not in iwi:
+        if key not in word_idf:
             tfidf1[key] = float(tfidf1[key]) * 13 / len(start)
         else:
-            tfidf1[key] = float(tfidf1[key]) * word_idf[iwi[key]] / len(start)
+            tfidf1[key] = float(tfidf1[key]) * word_idf[key] / len(start)
 
     for key in tfidf2:
-        if key not in iwi:
+        if key not in word_idf:
             tfidf2[key] = float(tfidf2[key]) * 13 / len(middle)
         else:
-            tfidf2[key] = float(tfidf2[key]) * word_idf[iwi[key]] / len(middle)
+            tfidf2[key] = float(tfidf2[key]) * word_idf[key] / len(middle)
 
     for key in tfidf3:
-        if key not in iwi:
+        if key not in word_idf:
             tfidf3[key] = float(tfidf3[key]) * 13 / len(end)
         else:
-            tfidf3[key] = float(tfidf3[key]) * word_idf[iwi[key]] / len(end)
+            tfidf3[key] = float(tfidf3[key]) * word_idf[key] / len(end)
 
         tfidf3[key] = (tfidf3[key] + tfidf2[key] + tfidf1[key]) / 3.0
 

@@ -2,13 +2,14 @@ import json
 from collections import Counter
 
 from nltk import word_tokenize
+from nltk.corpus import stopwords
 
 with open('brown_freqs.json') as f:
     BASE_FREQS = json.load(f)
     MIN_FREQ = min(BASE_FREQS.values())
 
 
-def keywords(title, text, idf, iwi, n=5, title_multiplier=2, threshold_count=4, ignore_punctuation=True):
+def keywords(title, text, n=5, title_multiplier=2, threshold_count=4, ignore_punctuation=True):
     """
     Extract top `n` keywords from a string, performing add-one smoothing on words that don't appear in the Brown corpus.
     Ignore words that appear below `threshold_count`, which is modified by counting words which appear in the title
@@ -30,11 +31,14 @@ def keywords(title, text, idf, iwi, n=5, title_multiplier=2, threshold_count=4, 
     relative = {key: freqs[key] / BASE_FREQS.get(key, MIN_FREQ / 1) for key in freqs}
     ordered = sorted(list(relative.keys()), key=lambda x: relative[x], reverse=True)
 
+    stop_words = stopwords.words('english')
+    ordered = [w for w in ordered if w not in stop_words and not w.isdigit() and w.isalnum()]
+
     if len(ordered) >= n:
         return ordered[:n]
     # otherwise use the title
     else:
         ordered = sorted(word_tokenize(title.lower()), key=lambda w: BASE_FREQS.get(key, MIN_FREQ / 1))
         if ignore_punctuation:
-            ordered = [w for w in ordered if w.isalnum()]
+            ordered = [w for w in ordered if w not in stop_words and not w.isdigit() and w.isalnum()]
         return ordered[:n]

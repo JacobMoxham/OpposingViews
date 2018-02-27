@@ -1,6 +1,5 @@
 # TODO
 import numpy as np
-from math import log
 from nltk.corpus import brown
 from nltk.corpus import stopwords
 from nltk import word_tokenize
@@ -57,17 +56,17 @@ def oped_check(text, words):
     probnews = 0
     for token in tokens:
         if token not in vocab:
-            probnews = probnews + log(0.5)
+            probnews = probnews + np.log(0.5)
         else:
-            probnews = probnews + log(words[token])
+            probnews = probnews + np.log(words[token])
 
 
     proboped = 0
     for token in tokens:
         if token not in vocab:
-            proboped = proboped + log(0.5)
+            proboped = proboped + np.log(0.5)
         else:
-            proboped = proboped + log(1 - words[token])
+            proboped = proboped + np.log(1 - words[token])
 
     print('Oped score:')
     print(proboped - probnews)
