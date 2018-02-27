@@ -10,7 +10,7 @@ import logging
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.externals import joblib
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     clf = Pipeline([('vect', CountVectorizer(preprocessor=preprocess, ngram_range=(1, 1))),
                     ('tfidf', TfidfTransformer()),
-                    ('clf', LogisticRegression())])
+                    ('clf', SGDClassifier())])
 
     logging.info('Training model')
     clf.fit(X_train['content'], Y_train)

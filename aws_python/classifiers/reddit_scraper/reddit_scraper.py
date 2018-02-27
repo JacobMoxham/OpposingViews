@@ -11,7 +11,7 @@ URL_BLACKLIST = ['.*reddit\.com.*',
                  '.*sli\.mg.*',
                  '.*redd\.it.*',
                  '.*imgur\.com.*',
-                 '.*www\.liveleak\.com.*',
+                 '.*liveleak\.com.*',
                  '.*reddituploads\.com.*',
                  '.*twitter\.com.*',
                  '.*twimg\.com.*',
@@ -21,6 +21,8 @@ URL_BLACKLIST = ['.*reddit\.com.*',
                  '.*\.jpg',
                  '.*\.jpeg',
                  '.*\.gif',
+                 '.*\.mp3',
+                 '.*\.mp4',
                  ]
 
 left_subreddits = ['Anarchism', 'socialism', 'progressive', 'democrats', 'Liberal', 'demsocialist', 'GreenParty', 'Marxism', 'feminisms', 'SocialDemocracy', 'chomsky', 'occupywallstreet',]
