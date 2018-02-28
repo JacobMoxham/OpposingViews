@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-from global_config import USE_CACHING
 from content_extraction.extract_content import extract_content
 from similar_articles.frontend import find_similar_articles
 from classifiers.classifiers import classify
 from suitability_scoring.calculate_suitability import get_suitable_articles
-from mongo.database_access import HeuristicsDB
 
 import time
 
@@ -21,7 +19,7 @@ def test(event):
              "summary": "What was the point of banning Russia from the Winter Olympics when 169 of their athletes are still being allowed to compete as neutrals? "}]
 
 
-def pipeline_test(passed_url):
+def pipeline_test(passed_url, db=None):
     print("Got article suggestions request for URL '{:s}'".format(passed_url))
     # TODO: Use proper logger
     start_time = time.time()
@@ -35,23 +33,23 @@ def pipeline_test(passed_url):
     print("Keywords: {:s}".format(", ".join(article_keywords)))
 
     # find similar articles based on keywords
+    # format: [{'title':<title>, 'url':<url>}, ...]
     similar_articles = find_similar_articles(article_keywords)
     similar_article_time = time.time()
     print("Similar articles:\n\t{:s}".format("\n\t".join([a["title"] for a in similar_articles])))
     print("Finding", len(similar_articles),"similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
-    # get heuristics db
-    if USE_CACHING:
-        db = HeuristicsDB()
+    article_db_entry = None
+    if db is not None:
         # check for db entry for initial article
         # TODO: consider checking when we last ran heuristics
         article_db_entry = db.read_article(passed_url)
 
-    if not USE_CACHING or article_db_entry is None:
+    if article_db_entry is None:
         # run heuristics on initial article
         initial_heuristics = classify({'text': article['text']})
 
-        if USE_CACHING:
+        if db is not None:
             # write to DB
             db.write_article(str(passed_url), initial_heuristics)
 
@@ -72,7 +70,8 @@ def pipeline_test(passed_url):
         try:
             url = entry['url']
 
-            if USE_CACHING:
+            cached_article = None
+            if db is not None:
                 # check if we have cached this article
                 # TODO: consider checking when we last ran heuristics
                 cached_article = db.read_article(url)
@@ -80,11 +79,11 @@ def pipeline_test(passed_url):
             # TODO: consider caching this info
             comparison_article = extract_content(url)
 
-            if not USE_CACHING or cached_article is None:
+            if cached_article is None:
                 # run heuristics
                 comparison_heuristics = classify({'text': comparison_article['text']})
 
-                if USE_CACHING:
+                if db is not None:
                     # write to db
                     db.write_article(url, comparison_heuristics)
             else:
