@@ -1,4 +1,4 @@
-from extract_content_newspaper import ExtractContentNewspaper
+from content_extraction.newspaper.extract_content_newspaper import ExtractContentNewspaper
 
 urls = [
     "http://www.bbc.co.uk/news/uk-politics-42867668",

@@ -29,7 +29,7 @@ class ExtractContentGoose(ExtractContentBackend):
     to_return : dict
         dictionary of values for the extracted article
     '''
-    def extract_content(self, url, enable_image_fetching=True, timeout=None, user_agent=None):
+    def extract_content(self, url, enable_image_fetching=False, timeout=None, user_agent=None):
         options = {'enable_image_fetching': enable_image_fetching}
         if timeout is not None:
             options['http_timeout'] = timeout
