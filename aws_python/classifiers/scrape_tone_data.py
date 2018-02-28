@@ -10,7 +10,7 @@ from content_extraction.extract_content import extract_content
 from urllib.parse import urljoin
 import re
 
-test = True
+test = False
 def getSeed(doctype):
     return max([0] + [int(x) + 1 for x in os.listdir(getFolderRoot(doctype)) if x.isdigit()])
 
