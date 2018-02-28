@@ -47,12 +47,13 @@ def pipeline_test(passed_url):
         # TODO: consider checking when we last ran heuristics
         article_db_entry = db.read_article(passed_url)
 
-    if USE_CACHING and article_db_entry is None:
+    if not USE_CACHING or article_db_entry is None:
         # run heuristics on initial article
         initial_heuristics = classify({'text': article['text']})
 
-        # write to DB
-        db.write_article(str(passed_url), initial_heuristics)
+        if USE_CACHING:
+            # write to DB
+            db.write_article(str(passed_url), initial_heuristics)
 
         # logging info
         initial_heuristic_time = time.time()
@@ -76,14 +77,16 @@ def pipeline_test(passed_url):
                 # TODO: consider checking when we last ran heuristics
                 cached_article = db.read_article(url)
 
-                # TODO: consider caching this info
-                comparison_article = extract_content(url)
+            # TODO: consider caching this info
+            comparison_article = extract_content(url)
 
-            if USE_CACHING and cached_article is None:
+            if not USE_CACHING or cached_article is None:
                 # run heuristics
                 comparison_heuristics = classify({'text': comparison_article['text']})
-                # write to db
-                db.write_article(url, comparison_heuristics)
+
+                if USE_CACHING:
+                    # write to db
+                    db.write_article(url, comparison_heuristics)
             else:
                 # use heuristics from database
                 comparison_heuristics = cached_article['heuristics']
