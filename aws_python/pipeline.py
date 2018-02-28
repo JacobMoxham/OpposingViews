@@ -8,7 +8,6 @@ from suitability_scoring.calculate_suitability import get_suitable_articles
 from mongo.database_access import HeuristicsDB
 
 import time
-import urllib
 
 
 def test(event):
@@ -46,9 +45,9 @@ def pipeline_test(passed_url):
         db = HeuristicsDB()
         # check for db entry for initial article
         # TODO: consider checking when we last ran heuristics
-        article = db.read_article(passed_url)
+        article_db_entry = db.read_article(passed_url)
 
-    if USE_CACHING and article is None:
+    if USE_CACHING and article_db_entry is None:
         # run heuristics on initial article
         initial_heuristics = classify({'text': article['text']})
 
