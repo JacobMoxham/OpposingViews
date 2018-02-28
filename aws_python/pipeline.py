@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from global_config import USE_CACHING
 from content_extraction.extract_content import extract_content
 from similar_articles.frontend import find_similar_articles
 from classifiers.classifiers import classify
@@ -30,7 +31,7 @@ def pipeline_test(passed_url):
     article = extract_content(passed_url)
     extraction_time = time.time()
     print("Extracting content from article took " + str(extraction_time - start_time) + " seconds")
-    
+
     article_keywords = article['keywords']
     print("Keywords: {:s}".format(", ".join(article_keywords)))
 
@@ -41,12 +42,13 @@ def pipeline_test(passed_url):
     print("Finding", len(similar_articles),"similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
     # get heuristics db
-    db = HeuristicsDB()
-    # check for db entry for initial article
-    # TODO: consider checking when we last ran heuristics
-    article_db_entry = db.read_article(passed_url)
+    if USE_CACHING:
+        db = HeuristicsDB()
+        # check for db entry for initial article
+        # TODO: consider checking when we last ran heuristics
+        article = db.read_article(passed_url)
 
-    if article_db_entry is None:
+    if USE_CACHING and article is None:
         # run heuristics on initial article
         initial_heuristics = classify({'text': article['text']})
 
@@ -70,14 +72,15 @@ def pipeline_test(passed_url):
         try:
             url = entry['url']
 
-            # check if we have cached this article
-            # TODO: consider checking when we last ran heuristics
-            cached_article = db.read_article(url)
+            if USE_CACHING:
+                # check if we have cached this article
+                # TODO: consider checking when we last ran heuristics
+                cached_article = db.read_article(url)
 
-            # TODO: consider caching this info
-            comparison_article = extract_content(url)
-            
-            if cached_article is None:
+                # TODO: consider caching this info
+                comparison_article = extract_content(url)
+
+            if USE_CACHING and cached_article is None:
                 # run heuristics
                 comparison_heuristics = classify({'text': comparison_article['text']})
                 # write to db
