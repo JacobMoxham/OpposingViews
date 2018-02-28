@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from global_config import USE_CACHING
 from content_extraction.extract_content import extract_content
 from similar_articles.frontend import find_similar_articles
 from classifiers.classifiers import classify
@@ -8,6 +9,7 @@ from mongo.database_access import HeuristicsDB
 
 import time
 import urllib
+
 
 def test(event):
     return [{"link": "http://www.bbc.co.uk/news/uk-politics-42929071",
@@ -19,16 +21,17 @@ def test(event):
              "title": "Winter Olympics 2018: Doping ban, neutral Russians & Pyeongchang medal hopes",
              "summary": "What was the point of banning Russia from the Winter Olympics when 169 of their athletes are still being allowed to compete as neutrals? "}]
 
+
 def pipeline_test(passed_url):
     print("Got article suggestions request for URL '{:s}'".format(passed_url))
-    #TODO: Use proper logger
+    # TODO: Use proper logger
     start_time = time.time()
 
     # extract content of passed url
     article = extract_content(passed_url)
     extraction_time = time.time()
     print("Extracting content from article took " + str(extraction_time - start_time) + " seconds")
-    
+
     article_keywords = article['keywords']
     print("Keywords: {:s}".format(", ".join(article_keywords)))
 
@@ -39,12 +42,13 @@ def pipeline_test(passed_url):
     print("Finding similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
     # get heuristics db
-    db = HeuristicsDB()
-    # check for db entry for initial article
-    # TODO: consider checking when we last ran heuristics
-    article = db.read_article(passed_url)
+    if USE_CACHING:
+        db = HeuristicsDB()
+        # check for db entry for initial article
+        # TODO: consider checking when we last ran heuristics
+        article = db.read_article(passed_url)
 
-    if article is None:
+    if USE_CACHING and article is None:
         # run heuristics on initial article
         initial_heuristics = classify({'text': article.cleaned_text})
         # write to DB
@@ -61,21 +65,21 @@ def pipeline_test(passed_url):
         initial_heuristic_time = time.time()
         print("Got cached initial heuristics, took " + str(initial_heuristic_time - similar_article_time) + " seconds")
 
-
     # run heuristics on each similar article
     comparison_heuristics_list = []
     for entry in similar_articles:
         try:
             url = entry['url']
 
-            # check if we have cached this article
-            # TODO: consider checking when we last ran heuristics
-            cached_article = db.read_article(url)
+            if USE_CACHING:
+                # check if we have cached this article
+                # TODO: consider checking when we last ran heuristics
+                cached_article = db.read_article(url)
 
-            # TODO: consider caching this info
-            comparison_article = extract_content(url)
-            
-            if cached_article is None:
+                # TODO: consider caching this info
+                comparison_article = extract_content(url)
+
+            if USE_CACHING and cached_article is None:
                 # run heuristics
                 comparison_heuristics = classify({'text': comparison_article.cleaned_text})
                 # write to db
@@ -89,14 +93,15 @@ def pipeline_test(passed_url):
         except:
             print('error extracting:', url)
 
-    comparasion_heuristic_time = time.time()
-    print("Running comparison heuristics took " + str(comparasion_heuristic_time - initial_heuristic_time) + " seconds")
+    comparison_heuristic_time = time.time()
+    print("Running comparison heuristics took " + str(comparison_heuristic_time - initial_heuristic_time) + " seconds")
 
     # run suitability calculations
     suitable_articles = get_suitable_articles(initial_heuristics, comparison_heuristics_list)[:3]
-    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['title'] for a,_ in suitable_articles])))
+    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['title'] for a, _ in suitable_articles])))
     suitability_calculation_time = time.time()
-    print("Running suitability calculations took " + str(suitability_calculation_time - comparasion_heuristic_time) + " seconds")
+    print("Running suitability calculations took " + str(
+        suitability_calculation_time - comparison_heuristic_time) + " seconds")
 
     # format for sending to plugin
     articles_to_return = []
