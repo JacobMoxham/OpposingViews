@@ -4,7 +4,6 @@ from pymongo import MongoClient
 class HeuristicsDB:
 
     def __init__(self):
-        # TODO: add URI so we can do this is AWS lambda
         client = MongoClient()
         # store heuristics DB
         self.db = client['article_heuristic_scores']
