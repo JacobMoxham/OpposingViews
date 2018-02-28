@@ -2,7 +2,7 @@ SHELL=/bin/bash
 
 PACKAGENAME=aws_python_test
 REMOTEUSER=ubuntu
-REMOTE=ec2-34-240-199-221.eu-west-1.compute.amazonaws.com
+REMOTE=ec2-34-245-119-189.eu-west-1.compute.amazonaws.com
 
 $(PACKAGENAME).zip:
 	#create zip package to upload to AWS
@@ -37,5 +37,5 @@ deploy: $(PACKAGENAME).zip
 start:
 	$(MAKE) depend
 	killall -q python3 || echo 1
-	bash -c 'source "bin/activate"  && ./server.py & '
+	bash -c 'source "bin/activate" ; ./server.py & '
 	#At this point is is safe to Ctrl-C if necessary
