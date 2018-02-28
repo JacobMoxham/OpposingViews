@@ -8,3 +8,4 @@ pandas
 matplotlib
 pymongo
 newspaper3k
+ssdeep
