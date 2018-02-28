@@ -6,3 +6,4 @@ scikit-learn>=0.19
 bottle
 pandas
 matplotlib
+pymongo

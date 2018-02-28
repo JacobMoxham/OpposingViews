@@ -1,4 +1,4 @@
-const DEBUG = 0;
+const DEBUG = 1;
 const api_base_debug = "http://localhost:8080/";
 const api_base_production = "https://opposingviews.media/api/"
 const api_base = DEBUG ? api_base_debug : api_base_production;
