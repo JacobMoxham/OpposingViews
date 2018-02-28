@@ -9,6 +9,7 @@ from mongo.database_access import HeuristicsDB
 import time
 import urllib
 
+
 def test(event):
     return [{"link": "http://www.bbc.co.uk/news/uk-politics-42929071",
              "imageLink": "https://ichef.bbci.co.uk/news/320/cpsprodpb/AFA4/production/_99746944_gettyimages-531840456.jpg",
@@ -19,9 +20,10 @@ def test(event):
              "title": "Winter Olympics 2018: Doping ban, neutral Russians & Pyeongchang medal hopes",
              "summary": "What was the point of banning Russia from the Winter Olympics when 169 of their athletes are still being allowed to compete as neutrals? "}]
 
+
 def pipeline_test(passed_url):
     print("Got article suggestions request for URL '{:s}'".format(passed_url))
-    #TODO: Use proper logger
+    # TODO: Use proper logger
     start_time = time.time()
 
     # extract content of passed url
@@ -36,31 +38,31 @@ def pipeline_test(passed_url):
     similar_articles = find_similar_articles(article_keywords)
     similar_article_time = time.time()
     print("Similar articles:\n\t{:s}".format("\n\t".join([a["title"] for a in similar_articles])))
-    print("Finding similar articles took " + str(similar_article_time - extraction_time) + " seconds")
+    print("Finding", len(similar_articles),"similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
     # get heuristics db
     db = HeuristicsDB()
     # check for db entry for initial article
     # TODO: consider checking when we last ran heuristics
-    article = db.read_article(passed_url)
+    article_db_entry = db.read_article(passed_url)
 
-    if article is None:
+    if article_db_entry is None:
         # run heuristics on initial article
-        initial_heuristics = classify({'text': article.cleaned_text})
+        initial_heuristics = classify({'text': article['text']})
+
         # write to DB
-        db.write_article(passed_url, initial_heuristics)
+        db.write_article(str(passed_url), initial_heuristics)
 
         # logging info
         initial_heuristic_time = time.time()
         print("Running initial heuristics took " + str(initial_heuristic_time - similar_article_time) + " seconds")
     else:
         # use cached heuristics if possible
-        initial_heuristics = article['heuristics']
+        initial_heuristics = article_db_entry['heuristics']
 
         # logging info
         initial_heuristic_time = time.time()
         print("Got cached initial heuristics, took " + str(initial_heuristic_time - similar_article_time) + " seconds")
-
 
     # run heuristics on each similar article
     comparison_heuristics_list = []
@@ -77,7 +79,7 @@ def pipeline_test(passed_url):
             
             if cached_article is None:
                 # run heuristics
-                comparison_heuristics = classify({'text': comparison_article.cleaned_text})
+                comparison_heuristics = classify({'text': comparison_article['text']})
                 # write to db
                 db.write_article(url, comparison_heuristics)
             else:
@@ -86,25 +88,29 @@ def pipeline_test(passed_url):
 
             # add article to list for suitability calculation
             comparison_heuristics_list.append(({'article': comparison_article, 'url': url}, comparison_heuristics))
-        except:
-            print('error extracting:', url)
+        except Exception as e:
+            print('Error extracting:', url)
+            print('Error message:', e)
+            print('\n')
 
-    comparasion_heuristic_time = time.time()
-    print("Running comparison heuristics took " + str(comparasion_heuristic_time - initial_heuristic_time) + " seconds")
+    comparison_heuristic_time = time.time()
+    print("Running comparison heuristics took " + str(comparison_heuristic_time - initial_heuristic_time) + " seconds")
 
     # run suitability calculations
     suitable_articles = get_suitable_articles(initial_heuristics, comparison_heuristics_list)[:3]
-    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['title'] for a,_ in suitable_articles])))
+
+    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['article']['title'] for a,_ in suitable_articles])))
     suitability_calculation_time = time.time()
-    print("Running suitability calculations took " + str(suitability_calculation_time - comparasion_heuristic_time) + " seconds")
+    print("Running suitability calculations took " + str(suitability_calculation_time - comparison_heuristic_time) + " seconds")
 
     # format for sending to plugin
     articles_to_return = []
     for suitable_article, _ in suitable_articles:
-        ret_article = {"link": suitable_article['url'],
+        suitable_article_attributes = suitable_article['article']
+        ret_article = {"link": suitable_article_attributes['url'],
                        "imageLink": "",
-                       "title": suitable_article['title'],
-                       "summary": '%s%s' % (suitable_article['text'][:100], '...')
+                       "title": suitable_article_attributes['title'],
+                       "summary": '%s%s' % (suitable_article_attributes['text'][:100], '...')
                        }
         articles_to_return.append(ret_article)
 
