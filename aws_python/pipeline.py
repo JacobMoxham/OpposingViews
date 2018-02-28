@@ -39,7 +39,7 @@ def pipeline_test(passed_url):
     similar_articles = find_similar_articles(article_keywords)
     similar_article_time = time.time()
     print("Similar articles:\n\t{:s}".format("\n\t".join([a["title"] for a in similar_articles])))
-    print("Finding similar articles took " + str(similar_article_time - extraction_time) + " seconds")
+    print("Finding", len(similar_articles),"similar articles took " + str(similar_article_time - extraction_time) + " seconds")
 
     # get heuristics db
     if USE_CACHING:
@@ -50,16 +50,17 @@ def pipeline_test(passed_url):
 
     if USE_CACHING and article is None:
         # run heuristics on initial article
-        initial_heuristics = classify({'text': article.cleaned_text})
+        initial_heuristics = classify({'text': article['text']})
+
         # write to DB
-        db.write_article(passed_url, initial_heuristics)
+        db.write_article(str(passed_url), initial_heuristics)
 
         # logging info
         initial_heuristic_time = time.time()
         print("Running initial heuristics took " + str(initial_heuristic_time - similar_article_time) + " seconds")
     else:
         # use cached heuristics if possible
-        initial_heuristics = article['heuristics']
+        initial_heuristics = article_db_entry['heuristics']
 
         # logging info
         initial_heuristic_time = time.time()
@@ -81,7 +82,7 @@ def pipeline_test(passed_url):
 
             if USE_CACHING and cached_article is None:
                 # run heuristics
-                comparison_heuristics = classify({'text': comparison_article.cleaned_text})
+                comparison_heuristics = classify({'text': comparison_article['text']})
                 # write to db
                 db.write_article(url, comparison_heuristics)
             else:
@@ -90,26 +91,29 @@ def pipeline_test(passed_url):
 
             # add article to list for suitability calculation
             comparison_heuristics_list.append(({'article': comparison_article, 'url': url}, comparison_heuristics))
-        except:
-            print('error extracting:', url)
+        except Exception as e:
+            print('Error extracting:', url)
+            print('Error message:', e)
+            print('\n')
 
     comparison_heuristic_time = time.time()
     print("Running comparison heuristics took " + str(comparison_heuristic_time - initial_heuristic_time) + " seconds")
 
     # run suitability calculations
     suitable_articles = get_suitable_articles(initial_heuristics, comparison_heuristics_list)[:3]
-    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['title'] for a, _ in suitable_articles])))
+
+    print("Suitable articles:\n\t{:s}".format("\n\t".join([a['article']['title'] for a,_ in suitable_articles])))
     suitability_calculation_time = time.time()
-    print("Running suitability calculations took " + str(
-        suitability_calculation_time - comparison_heuristic_time) + " seconds")
+    print("Running suitability calculations took " + str(suitability_calculation_time - comparison_heuristic_time) + " seconds")
 
     # format for sending to plugin
     articles_to_return = []
     for suitable_article, _ in suitable_articles:
-        ret_article = {"link": suitable_article['url'],
+        suitable_article_attributes = suitable_article['article']
+        ret_article = {"link": suitable_article_attributes['url'],
                        "imageLink": "",
-                       "title": suitable_article['title'],
-                       "summary": '%s%s' % (suitable_article['text'][:100], '...')
+                       "title": suitable_article_attributes['title'],
+                       "summary": '%s%s' % (suitable_article_attributes['text'][:100], '...')
                        }
         articles_to_return.append(ret_article)
 
