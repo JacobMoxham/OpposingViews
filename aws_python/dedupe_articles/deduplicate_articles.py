@@ -12,7 +12,7 @@ def get_unique_hashes(possible_dupes, extra_articles=None):
         is_unique = True
 
         for other_hash in seen_hashes:
-            if compare_similarities(test_hash, other_hash) > 0.2:
+            if compare_similarities(test_hash, other_hash) > 0.7:
                 is_unique = False
                 break
 
