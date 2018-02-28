@@ -14,10 +14,10 @@ bin lib:
 .PHONY: deploy depend start clean cleandep cleanall
 
 cleandep:
-	if [ -d bin ]; then rm -r bin; fi;
-	if [ -d lib ]; then rm -r lib; fi;
-	if [ -r lib64 ]; then rm -r lib64; fi;
-	if [ -r pip-selfcheck.json ]; then rm pip-selfcheck.json; fi
+	if [ -e bin ]; then rm -r bin; fi;
+	if [ -e lib ]; then rm -r lib; fi;
+	if [ -h lib64 ]; then rm lib64; fi;
+	if [ -e pip-selfcheck.json ]; then rm pip-selfcheck.json; fi
 
 clean:
 	$(if -r $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)

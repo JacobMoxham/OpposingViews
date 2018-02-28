@@ -1,12 +1,10 @@
-const DEBUG = 0;
-const api_base_debug = "http://localhost:8080/";
-const api_base_production = "https://opposingviews.media/api/"
-const api_base = DEBUG ? api_base_debug : api_base_production;
+const DEBUG = config.IS_DEBUG
+const api_base = DEBUG ? config.DEBUG_URL_BASE : config.PROD_URL_BASE;
 
-const feedbackProcessingAPI = 'http://ec2-34-245-119-189.eu-west-1.compute.amazonaws.com:8081/feedback-processing';
-const backendProcessingAPI = api_base + 'get-views';
+const feedbackProcessingAPI = api_base + config.FEEDBACK_URL_SLUG;
+const backendProcessingAPI = api_base + config.ARTICLE_SUGGESTION_SLUG;
 
-const CACHE_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
+const CACHE_TIMEOUT = config.CACHE_TIMEOUT;
 
 /*
  * Creates a list of items which represents a list of suggested

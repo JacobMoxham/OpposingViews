@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import bottle
 from bottle import Bottle, route, request, run
 import pipeline
 import json
 import time
 
-app = Bottle()
+app = bottle.app()
 
 @app.route('/')
 def success():
