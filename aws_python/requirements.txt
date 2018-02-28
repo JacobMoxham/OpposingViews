@@ -7,3 +7,4 @@ bottle
 pandas
 matplotlib
 pymongo
+newspaper3k
