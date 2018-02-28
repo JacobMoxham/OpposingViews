@@ -107,7 +107,7 @@ def pipeline_test(passed_url, db=None):
     # article in the list
     article_is_unique = get_unique_hashes([a['content_hash'] for a, _ in analysed_articles], [source_article_hash])
     unique_analysed_articles = [aa for i, aa in enumerate(analysed_articles) if article_is_unique[i] is 1]
-    print("Removed duplicate articles:\n\t{:s}".format("\n\t".join([a['url'] for a, _ in analysed_articles if article_is_unique is not 1])))
+    print("Removed duplicate articles:\n\t{:s}".format("\n\t".join([a['url'] for i, (a, _) in enumerate(analysed_articles) if article_is_unique[i] is not 1])))
     duplicate_calculation_time = time.time()
     print("Removing duplicate articles took {:f} seconds".format(duplicate_calculation_time - comparison_heuristic_time))
 
