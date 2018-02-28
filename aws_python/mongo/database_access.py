@@ -27,13 +27,14 @@ class HeuristicsDB:
     result : InsertOneResult
         the result of inserting the document
     '''
-    def write_article(self, url, heuristics):
+    def write_article(self, url, heuristics, content_hash=""):
         # We do not specify url as _id here as we may end up with more than one entry
         # over time for the same id. This problem is ignored later via the use of find_one
         # but the solution at least remains robust.
         article = {
             "url": url,
-            "heuristics": heuristics
+            "heuristics": heuristics,
+            "content_hash": content_hash
         }
         articles = self.db.articles
         # Return the result
