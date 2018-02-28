@@ -45,8 +45,8 @@ def classify_list(articles):
         sentiment = (positivity + 1 - negativity) / 2
         result.append( {'source_politics' : p, 
                         'source_tone' : t, 
-                        'source_positivity' : positivity,
-                        'source_negativity' : negativity,
+#                        'source_positivity' : positivity,
+#                        'source_negativity' : negativity,
                         'source_sentiment' : sentiment
                         })
     return result
