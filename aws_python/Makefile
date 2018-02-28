@@ -36,6 +36,6 @@ deploy: $(PACKAGENAME).zip
 
 start:
 	$(MAKE) depend
-	killall -q python3 ; echo 1
-	bash -c 'source "bin/activate" ; ./server.py & '
+	killall -q python3 || echo 1
+	bash -c 'source "bin/activate"  && ./server.py & '
 	#At this point is is safe to Ctrl-C if necessary
