@@ -93,7 +93,9 @@ function onExtensionWindowLoad() {
         console.log('Looking for item in cache');
         chrome.storage.local.get(cachedDataKey,
             (items) => {
-                if (items[cachedDataKey] && items[cachedDataKey].timeout > (new Date()).getTime()) {
+                if (items[cachedDataKey]
+                        && items[cachedDataKey].timeout > (new Date()).getTime()
+                        && items[cachedDataKey].res.length > 0) {
                     console.log('Cache hit');
                     createSuggestedArticleTable(
                         items[cachedDataKey].res, 
@@ -159,17 +161,26 @@ function getSuggestedArticleList(currentURL, cachedDataKey) {
         console.log("using url " + currentURL);
         $.post(backendProcessingAPI, requestData)
         .done((res) => {
-
             res = JSON.parse(res);
 
-            console.log('Storing result to cache');
+            if (res.length > 0) {
+                console.log('Storing result to cache');
             
-            cachedResult = {'res' : res , 'timeout' : ((new Date()).getTime() + CACHE_TIMEOUT)};
-            var keyval = {};
-            keyval[cachedDataKey] = cachedResult;
-            chrome.storage.local.set(keyval);
+                cachedResult = {
+                    'res' : res , 
+                    'timeout' : ((new Date()).getTime() + CACHE_TIMEOUT)
+                };
+            
+                var keyval = {};
+                keyval[cachedDataKey] = cachedResult;
+                chrome.storage.local.set(keyval);
 
-            createSuggestedArticleTable(res, currentURL);
+                createSuggestedArticleTable(res, currentURL);
+            }
+            else {
+                $("#suggested-article-loading-status")
+                    .text('Unfortunately, no suitable articles could be found');
+            }
         })
         .fail((jqXHR, textStatus, errorThrown) => {
             $("#suggested-article-loading-status").text(`Failed to find suggested articles: ${textStatus}`);
