@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 import re
 
 test = False
+
 def getSeed(doctype):
     return max([0] + [int(x) + 1 for x in os.listdir(getFolderRoot(doctype)) if x.isdigit()])
 
