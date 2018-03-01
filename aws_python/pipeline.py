@@ -46,17 +46,25 @@ def pipeline_test(passed_url, db=None):
         # TODO: consider checking when we last ran heuristics
         article_db_entry = db.read_article(passed_url)
 
-    if article_db_entry is None:
-        # run heuristics on initial article
+    # get heuristics for initial article
+    have_updated_source_article_data = False
+    if article_db_entry is None or 'heuristics' not in article_db_entry:
         initial_heuristics = classify({'text': article['text']})
-        source_article_hash = hash_dirty_text(article['text'])
-        if db is not None:
-            # write to DB
-            db.write_article(url=str(passed_url), heuristics=initial_heuristics, content_hash=source_article_hash)
+        have_updated_source_article_data = True
     else:
         # use cached heuristics if possible
         initial_heuristics = article_db_entry['heuristics']
+
+    # get hash for initial article
+    if article_db_entry is None or 'content_hash' not in article_db_entry or not article_db_entry['content_hash']:
+        source_article_hash = hash_dirty_text(article['text'])
+        have_updated_source_article_data = True
+    else:
         source_article_hash = article_db_entry['content_hash']
+
+    # write any updated data back to the db
+    if db is not None and have_updated_source_article_data:
+        db.write_article(url=str(passed_url), heuristics=initial_heuristics, content_hash=source_article_hash)
 
     initial_heuristic_time = time.time()
     print("Got cached initial heuristics, took " + str(initial_heuristic_time - similar_article_time) + " seconds")
@@ -77,13 +85,13 @@ def pipeline_test(passed_url, db=None):
             comparison_article = extract_content(url)
             have_updated_article_data = False
 
-            if cached_article is None or cached_article['heuristics'] is None:
+            if cached_article is None or 'heuristics' not in cached_article:
                 comparison_heuristics = classify({'text': comparison_article['text']})
                 have_updated_article_data = True
             else:
                 comparison_heuristics = cached_article['heuristics']
 
-            if cached_article is None or not cached_article['content_hash']:
+            if cached_article is None or 'content_hash' not in cached_article or not cached_article['content_hash']:
                 article_hash = hash_dirty_text(comparison_article['text'])
                 have_updated_article_data = True
             else:
