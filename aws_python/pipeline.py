@@ -5,7 +5,7 @@ from similar_articles.frontend import find_similar_articles
 from classifiers.classifiers import classify
 from suitability_scoring.calculate_suitability import get_suitable_articles
 from dedupe_articles import get_unique_hashes, hash_dirty_text
-
+from multiprocessing import Pool
 import time
 
 
@@ -18,6 +18,46 @@ def test(event):
              "imageLink": "https://ichef.bbci.co.uk/onesport/cps/480/cpsprodpb/11BEF/production/_99778627_winters.jpg",
              "title": "Winter Olympics 2018: Doping ban, neutral Russians & Pyeongchang medal hopes",
              "summary": "What was the point of banning Russia from the Winter Olympics when 169 of their athletes are still being allowed to compete as neutrals? "}]
+
+
+# Takes URL = input url
+#       cached_article = result of db.read_article(url) - None or a dict.
+def process_url(url, cached_article):
+    # TODO: consider checking when we last ran heuristics re cached_article
+    try:
+        # TODO: consider caching this info
+        comparison_article = extract_content(url)
+        have_updated_article_data = False
+
+        if cached_article is None or 'heuristics' not in cached_article:
+            comparison_heuristics = classify({'text': comparison_article['text']})
+            have_updated_article_data = True
+        else:
+            comparison_heuristics = cached_article['heuristics']
+
+        if cached_article is None or 'content_hash' not in cached_article or not cached_article['content_hash']:
+            article_hash = hash_dirty_text(comparison_article['text'])
+            have_updated_article_data = True
+        else:
+            article_hash = cached_article['content_hash']
+
+        # Provide some data to write back to the db if necessary
+        db_writeback = None
+        if have_updated_article_data:
+            db_writeback = (url, comparison_heuristics, article_hash)
+
+        return ({'article': comparison_article, 'url': url, 'content_hash': article_hash}, comparison_heuristics),\
+            db_writeback  # data to write back to db
+
+    except Exception as e:
+        print('Error extracting:', url)
+        print('Error message:', e)
+        print('\n')
+        return None
+
+
+# Used for fetching/processing articles
+pool = Pool(processes=20)
 
 
 def pipeline_test(passed_url, db=None):
@@ -46,58 +86,44 @@ def pipeline_test(passed_url, db=None):
         # TODO: consider checking when we last ran heuristics
         article_db_entry = db.read_article(passed_url)
 
-    if article_db_entry is None:
-        # run heuristics on initial article
+    # get heuristics for initial article
+    have_updated_source_article_data = False
+    if article_db_entry is None or 'heuristics' not in article_db_entry:
         initial_heuristics = classify({'text': article['text']})
-        source_article_hash = hash_dirty_text(article['text'])
-        if db is not None:
-            # write to DB
-            db.write_article(url=str(passed_url), heuristics=initial_heuristics, content_hash=source_article_hash)
+        have_updated_source_article_data = True
     else:
         # use cached heuristics if possible
         initial_heuristics = article_db_entry['heuristics']
+
+    # get hash for initial article
+    if article_db_entry is None or 'content_hash' not in article_db_entry or not article_db_entry['content_hash']:
+        source_article_hash = hash_dirty_text(article['text'])
+        have_updated_source_article_data = True
+    else:
         source_article_hash = article_db_entry['content_hash']
+
+    # write any updated data back to the db
+    if db is not None and have_updated_source_article_data:
+        db.write_article(url=str(passed_url), heuristics=initial_heuristics, content_hash=source_article_hash)
 
     initial_heuristic_time = time.time()
     print("Got cached initial heuristics, took " + str(initial_heuristic_time - similar_article_time) + " seconds")
 
-    # run heuristics on each similar article
-    analysed_articles = []
-    for entry in similar_articles:
-        url = entry['url']
+    # fetch & run heuristics on each similar article
+    if db is not None:
+        pool_data = [(a['url'], db.read_article(a['url'])) for a in similar_articles]
+    else:
+        pool_data = [(a['url'], None) for a in similar_articles]
+    # format: pool_output = [(<article data>, <db writeback|None>), ...]
+    pool_output = [x for x in pool.starmap(process_url, pool_data) if x is not None]
+    analysed_articles = [aa for aa, _ in pool_output]
 
-        try:
-            cached_article = None
-            if db is not None:
-                # check if we have cached this article
-                # TODO: consider checking when we last ran heuristics
-                cached_article = db.read_article(url)
-
-            # TODO: consider caching this info
-            comparison_article = extract_content(url)
-            have_updated_article_data = False
-
-            if cached_article is None or cached_article['heuristics'] is None:
-                comparison_heuristics = classify({'text': comparison_article['text']})
-                have_updated_article_data = True
-            else:
-                comparison_heuristics = cached_article['heuristics']
-
-            if cached_article is None or not cached_article['content_hash']:
-                article_hash = hash_dirty_text(comparison_article['text'])
-                have_updated_article_data = True
-            else:
-                article_hash = cached_article['content_hash']
-
-            if have_updated_article_data and db is not None:
-                db.write_article(url=url, heuristics=comparison_heuristics, content_hash=article_hash)
-
-            # add article to list for suitability calculation
-            analysed_articles.append(({'article': comparison_article, 'url': url, 'content_hash': article_hash}, comparison_heuristics))
-        except Exception as e:
-            print('Error extracting:', url)
-            print('Error message:', e)
-            print('\n')
+    # Write data back to the db
+    # format: db_writebacks = [(url, comparison_heuristics, article_hash), ...]
+    if db is not None:
+        db_writebacks = [x for _, x in pool_output if x is not None]
+        for url, comparison_heuristics, article_hash in db_writebacks:
+            db.write_article(url=url, heuristics=comparison_heuristics, content_hash=article_hash)
 
     comparison_heuristic_time = time.time()
     print("Article fetching & running comparison heuristics took " + str(comparison_heuristic_time - initial_heuristic_time) + " seconds")
@@ -107,7 +133,7 @@ def pipeline_test(passed_url, db=None):
     # article in the list
     article_is_unique = get_unique_hashes([a['content_hash'] for a, _ in analysed_articles], [source_article_hash])
     unique_analysed_articles = [aa for i, aa in enumerate(analysed_articles) if article_is_unique[i] is 1]
-    print("Removed duplicate articles:\n\t{:s}".format("\n\t".join([a['url'] for a, _ in analysed_articles if article_is_unique is not 1])))
+    print("Removed duplicate articles:\n\t{:s}".format("\n\t".join([a['url'] for i, (a, _) in enumerate(analysed_articles) if article_is_unique[i] is not 1])))
     duplicate_calculation_time = time.time()
     print("Removing duplicate articles took {:f} seconds".format(duplicate_calculation_time - comparison_heuristic_time))
 

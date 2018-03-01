@@ -18,6 +18,7 @@ cleandep:
 	if [ -e lib ]; then rm -r lib; fi;
 	if [ -h lib64 ]; then rm lib64; fi;
 	if [ -e pip-selfcheck.json ]; then rm pip-selfcheck.json; fi
+	if [ -e include ]; then rm -r include; fi
 
 clean:
 	$(if -r $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
