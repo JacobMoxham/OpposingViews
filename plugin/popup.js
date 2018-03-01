@@ -5,6 +5,7 @@ const feedbackProcessingAPI = api_base + config.FEEDBACK_URL_SLUG;
 const backendProcessingAPI = api_base + config.ARTICLE_SUGGESTION_SLUG;
 
 const CACHE_TIMEOUT = config.CACHE_TIMEOUT;
+const CACHING_ENABLED = config.DISABLE_CACHING !== true;
 
 /*
  * Creates a list of items which represents a list of suggested
@@ -93,18 +94,19 @@ function onExtensionWindowLoad() {
         console.log('Looking for item in cache');
         chrome.storage.local.get(cachedDataKey,
             (items) => {
-                if (items[cachedDataKey]
+                if (CACHING_ENABLED // this can probably be written better but oh well - hj
+                        && items[cachedDataKey]
                         && items[cachedDataKey].timeout > (new Date()).getTime()
                         && items[cachedDataKey].res.length > 0) {
                     console.log('Cache hit');
                     createSuggestedArticleTable(
-                        items[cachedDataKey].res, 
+                        items[cachedDataKey].res,
                         currentURL
                     );
                 }
                 else {
                     if (items[cachedDataKey])
-                        console.log('Cache hit, but timeout');
+                        console.log('Item in cache, but not used');
                     else
                         console.log('Cache miss');
                     getSuggestedArticleList(currentURL, cachedDataKey);
