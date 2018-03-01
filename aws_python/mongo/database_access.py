@@ -4,15 +4,17 @@ from pymongo import MongoClient
 class HeuristicsDB:
 
     def __init__(self):
-        client = MongoClient()
+        self.client = MongoClient()
 
         # test connection
-        client.server_info()
+        self.client.server_info()
 
         # store heuristics DB
-        self.db = client['article_heuristic_scores']
+        self.db = self.client['article_heuristic_scores']
 
 
+    def close(self):
+        self.client.close()
     '''
     Parameters
     ----------
