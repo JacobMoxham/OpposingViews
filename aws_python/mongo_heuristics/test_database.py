@@ -1,4 +1,4 @@
-import mongo.database_access as mongo
+import mongo_heuristics.database_access as mongo
 
 # create test document
 url = "test url"

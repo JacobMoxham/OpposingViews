@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
-import numpy
-from aws_feedback.mongo.database_access import FeedbackDB
-from aws_python.mongo.database_access import HeuristicsDB
+
+from aws_python.mongo_heuristics.database_access import HeuristicsDB
 
 
 def get_all_urls(db):
