@@ -86,6 +86,7 @@ def pipeline_test(passed_url, db=None):
         # TODO: consider checking when we last ran heuristics
         article_db_entry = db.read_article(passed_url)
 
+    # TODO: fix if db is off
     # get heuristics for initial article
     have_updated_source_article_data = False
     if article_db_entry is None or 'heuristics' not in article_db_entry:
