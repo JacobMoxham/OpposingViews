@@ -23,14 +23,17 @@ class TestClassifiers(unittest.TestCase):
     def test_positive_tone(self):
         text = 'This thing is awesome and amazing'
         classification = classifiers.classify({'text': text})
-#        self.assertTrue(classification['source_positivity'] > 0.5)
         self.assertTrue(classification['source_sentiment'] > 0.5)
 
     def test_negative_tone(self):
         text = 'This thing is horrible and pointless'
         classification = classifiers.classify({'text' : text})
-#        self.assertTrue(classification['source_negativity'] > 0.5)
         self.assertTrue(classification['source_sentiment'] < 0.5)
+
+    def test_empty_articles(self):
+        text = ""
+        classification = classifiers.classify({'text' : text})
+        self.assertEqual(classification['source_sentiment'], 0.5)
 
 if __name__ == '__main__':
     unittest.main()

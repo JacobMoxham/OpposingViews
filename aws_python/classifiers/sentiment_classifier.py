@@ -87,8 +87,10 @@ def classify(sorted_training_data, test_data):
     test_distribution = get_sentiment_distribution(test_data, load_lexicon())
     for sentiment in SENTIMENTS:
         array = sorted_training_data[sentiment]
-
-        result[sentiment] = np.searchsorted(array, test_distribution[sentiment]) / array.size
+        if sentiment in test_distribution:
+            result[sentiment] = np.searchsorted(array, test_distribution[sentiment]) / array.size
+        else:
+            result[sentiment] = 0
     return result
 
 def classify_all(sorted_training_data, test_datas):
