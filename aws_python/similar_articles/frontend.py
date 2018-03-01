@@ -1,15 +1,20 @@
 from .backend_bing import BackendBing
 from .backend_google import BackendGoogle
 import itertools
+from urllib.parse import urldefrag
 
 backends = [BackendBing(), BackendGoogle()]
 
 
-# https://stackoverflow.com/a/480227/1763627
-def remove_duplicates(seq):
+# based on https://stackoverflow.com/a/480227/1763627
+def remove_duplicates(seq, comparison_mapper=lambda x: x):
     seen = set()
-    seen_add = seen.add
-    return [x for x in seq if not (x in seen or seen_add(x))]
+    return [x for x in seq if not (comparison_mapper(x) in seen or seen.add(comparison_mapper(x)))]
+
+
+# de-duplicate on the url without query string
+def remove_duplicates_on_url(articles):
+    return remove_duplicates(articles, lambda x: urldefrag(x['url'])[0])
 
 
 # https://stackoverflow.com/a/21482016/1763627
@@ -29,9 +34,9 @@ def find_similar_articles(keywords):
     Format: [{'title':<title>, 'url':<url>}, ...]
     """
     backend_results = [b.get_similar_for_keywords(keywords) for b in backends]
-    # TODO: remove duplicates
-    # can't use the remove_duplicates function as dicts don't behave well in sets
-    results = interleave(*backend_results)
+
+    # Interleave & de-duplicate results
+    results = remove_duplicates_on_url(interleave(*backend_results))
     return results
 
 

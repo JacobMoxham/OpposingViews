@@ -13,3 +13,5 @@ __pycache__/
 ._*
 *~
 
+machine_learning_research/data
+plugin/config.js

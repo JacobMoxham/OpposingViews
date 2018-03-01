@@ -4,8 +4,11 @@ from pymongo import MongoClient
 class HeuristicsDB:
 
     def __init__(self):
-        # TODO: add URI so we can do this is AWS lambda
         client = MongoClient()
+
+        # test connection
+        client.server_info()
+
         # store heuristics DB
         self.db = client['article_heuristic_scores']
 
@@ -24,20 +27,21 @@ class HeuristicsDB:
     result : InsertOneResult
         the result of inserting the document
     '''
-    def write_article(self, url, heuristics):
+    def write_article(self, url, heuristics, content_hash=""):
         # We do not specify url as _id here as we may end up with more than one entry
         # over time for the same id. This problem is ignored later via the use of find_one
         # but the solution at least remains robust.
         article = {
-            "url" : url,
-            "heuristics" : heuristics
+            "url": url,
+            "heuristics": heuristics,
+            "content_hash": content_hash
         }
         articles = self.db.articles
         # Return the result
         return articles.insert_one(article)
 
     # TODO: implement this when we know what the articles look like in the rest of the system
-    #def write_articles(db, articles):
+    # def write_articles(db, articles):
 
 
     '''
