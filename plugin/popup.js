@@ -73,7 +73,7 @@ function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
     console.log(requestData);
     $.post(feedbackProcessingAPI, requestData)
     .done((res) => {
-            alert(JSON.parse(res).message);
+            console.log(JSON.parse(res).message);
             thumbsElem.hide();
     }).fail((jqXHR, textStatus, errorThrown) => {
             $("#suggested-article-loading-status").text(`Failed to submit feedback: ${textStatus}`);
