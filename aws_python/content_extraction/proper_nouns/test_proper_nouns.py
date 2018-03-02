@@ -1,5 +1,5 @@
-from extract_proper_nouns import ExtractProperNouns
-from extract_content_newspaper import ExtractContentNewspaper
+from content_extraction.newspaper.extract_content_newspaper import ExtractContentNewspaper
+from content_extraction.proper_nouns.extract_proper_nouns import ExtractProperNouns
 
 urls = [
     "http://www.bbc.co.uk/news/uk-politics-42867668",
@@ -19,6 +19,6 @@ for article in articles:
     	
     print (article['title'])
     print("Title: ", pn.extract_proper_nouns(article['title']))
-    
+
     
 print("\n")

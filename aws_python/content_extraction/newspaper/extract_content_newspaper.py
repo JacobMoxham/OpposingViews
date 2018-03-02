@@ -6,7 +6,7 @@ from content_extraction.extract_content_backend import ExtractContentBackend
 class ExtractContentNewspaper(ExtractContentBackend):
     def __init__(self):
         super().__init__()
-        self.backend_name = "Goose content extraction API"
+        self.backend_name = "Newspaper content extraction API"
         nltk.download('punkt')
 
     '''

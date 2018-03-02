@@ -86,6 +86,7 @@ def pipeline_test(passed_url, db=None):
         # TODO: consider checking when we last ran heuristics
         article_db_entry = db.read_article(passed_url)
 
+    # TODO: fix if db is off
     # get heuristics for initial article
     have_updated_source_article_data = False
     if article_db_entry is None or 'heuristics' not in article_db_entry:
@@ -110,16 +111,20 @@ def pipeline_test(passed_url, db=None):
     print("Got cached initial heuristics, took " + str(initial_heuristic_time - similar_article_time) + " seconds")
 
     # fetch & run heuristics on each similar article
-    pool_data = [(a['url'], db.read_article(a['url'])) for a in similar_articles]
+    if db is not None:
+        pool_data = [(a['url'], db.read_article(a['url'])) for a in similar_articles]
+    else:
+        pool_data = [(a['url'], None) for a in similar_articles]
     # format: pool_output = [(<article data>, <db writeback|None>), ...]
     pool_output = [x for x in pool.starmap(process_url, pool_data) if x is not None]
     analysed_articles = [aa for aa, _ in pool_output]
 
     # Write data back to the db
     # format: db_writebacks = [(url, comparison_heuristics, article_hash), ...]
-    db_writebacks = [x for _, x in pool_output if x is not None]
-    for url, comparison_heuristics, article_hash in db_writebacks:
-        db.write_article(url=url, heuristics=comparison_heuristics, content_hash=article_hash)
+    if db is not None:
+        db_writebacks = [x for _, x in pool_output if x is not None]
+        for url, comparison_heuristics, article_hash in db_writebacks:
+            db.write_article(url=url, heuristics=comparison_heuristics, content_hash=article_hash)
 
     comparison_heuristic_time = time.time()
     print("Article fetching & running comparison heuristics took " + str(comparison_heuristic_time - initial_heuristic_time) + " seconds")
