@@ -3,8 +3,14 @@ from pymongo import MongoClient
 
 class FeedbackDB():
     def __init__(self):
-        client = MongoClient()
-        self.db = client['feedback']
+        self.client = MongoClient()
+        self.db = self.client['feedback']
+
+    def close(self):
+        self.client.close()
+
+    def get_all_links(self):
+        return self.db.feedback_links.find()
 
     def store_feedback(self, feedback, from_url, to_url):
         # create link
@@ -21,7 +27,7 @@ class FeedbackDB():
 
         if links is None:
             # find documents terminating at passed url
-            links = self.db.find({'to': url})
+            links = self.db.feedback_links.find({'to': url})
 
         # initialise count
         pos = 0
@@ -36,7 +42,7 @@ class FeedbackDB():
 
         if links is None:
             # find documents terminating at passed url
-            links = self.db.find({'to': url})
+            links = self.db.feedback_links.find({'to': url})
 
         # initialise count
         neg = 0
@@ -51,10 +57,13 @@ class FeedbackDB():
 
         if links is None:
             # find documents terminating at passed url
-            links = self.db.find({'to': url})
+            links = self.db.feedback_links.find({'to': url})
 
         pos = self.count_pos(url, links)
         neg = self.count_neg(url, links)
 
         # TODO: check this is not int
-        return pos / neg
+        if pos > 0:
+            return pos / pos+neg
+        else:
+            return 0

@@ -2,7 +2,6 @@ from pymongo import MongoClient
 
 
 class HeuristicsDB:
-
     def __init__(self):
         self.client = MongoClient()
 
@@ -12,9 +11,9 @@ class HeuristicsDB:
         # store heuristics DB
         self.db = self.client['article_heuristic_scores']
 
-
     def close(self):
         self.client.close()
+
     '''
     Parameters
     ----------
@@ -29,6 +28,7 @@ class HeuristicsDB:
     result : InsertOneResult
         the result of inserting the document
     '''
+
     def write_article(self, url, heuristics, content_hash=""):
         # We do not specify url as _id here as we may end up with more than one entry
         # over time for the same id. This problem is ignored later via the use of find_one
@@ -62,4 +62,4 @@ class HeuristicsDB:
 
     def read_article(self, url):
         articles = self.db.articles
-        return articles.find_one({"url" : url})
+        return articles.find_one({"url": url})

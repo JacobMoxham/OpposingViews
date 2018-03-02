@@ -9,3 +9,5 @@ pymongo
 newspaper3k
 ssdeep
 tornado
+pandas
+matplotlib
