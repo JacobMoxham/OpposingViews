@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 from aws_python.mongo_heuristics.database_access import HeuristicsDB
 
 
 def get_all_urls(db):
-    links = db.find({})
+    links = db.get_all_links()
     urls = []
     for l in links:
-        urls.append(l['url'])
+        urls.append(l['to'])
 
     return urls
 
@@ -20,8 +21,14 @@ def plot_pos_percentages(db, urls=None):
     for url in urls:
         percentages.append(db.percentage_positive(url))
 
-    plt.plot(urls, percentages)
-    plt.show()
+    plt.clf()
+
+    plt.hist(percentages, bins=[x/10 for x in range(11)])
+    plt.title('Positivity of feedback for articles in bins of size 0.1')
+    plt.xlabel('Proportions of positive feedback')
+    plt.ylabel('Number of articles')
+    plt.ylim([0,1])
+    plt.savefig('../../analysis_graphs/article_positivity.png')
 
 
 def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
@@ -38,7 +45,7 @@ def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
     right_right_pos = 0
     right_right_neg = 0
 
-    links = db.find({})
+    links = db.get_all_links()
 
     # count for each type of connection
     for l in links:
@@ -67,10 +74,19 @@ def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
         else:
             print('plot_liked_alternate_or_same_political_leaning: malformed tuple')
 
-    left_left = left_right_pos/left_left_neg
-    left_right = left_right_pos/left_right_neg
-    right_left = right_left_pos/right_left_neg
-    right_right = right_right_pos/right_right_neg
+    left_left = left_right_pos/(left_right_pos+left_left_neg) if left_right_pos > 0 else 0
+    left_right = left_right_pos/(left_right_pos+left_right_neg) if left_right_pos > 0 else 0
+    right_left = right_left_pos/(right_left_pos+right_left_neg) if right_left_pos > 0 else 0
+    right_right = right_right_pos/(right_right_pos+right_right_neg) if right_right_pos > 0 else 0
 
-    plt.bar([left_left, left_right, right_left, right_right])
-    
+    plt.clf()
+
+    x = np.arange(4)
+    plt.bar(x, [left_left, left_right, right_left, right_right])
+    plt.xticks(x, ('left-left', 'left-right', 'right-left', 'right-right'))
+    plt.ylim([0,1])
+    plt.xlabel('Political leanings of \'from\' articles and \'to\' articles')
+    plt.ylabel('Proportion of positive feedback')
+    plt.title('Positivity of feedback broken down by political leanings \n of the initial site and the suggested site')
+    plt.savefig('../../analysis_graphs/article_positivity_by_politics_to_and_from.png')
+
