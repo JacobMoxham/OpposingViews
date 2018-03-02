@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 
-PACKAGENAME=aws_python_test
+PACKAGENAME=aws_python
 REMOTEUSER=ubuntu
 REMOTE=ec2-34-245-119-189.eu-west-1.compute.amazonaws.com
 
@@ -21,7 +21,7 @@ cleandep:
 	if [ -e include ]; then rm -r include; fi
 
 clean:
-	$(if -r $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
+	if [ -e $(PACKAGENAME).zip ]; then rm $(PACKAGENAME).zip; fi;
 
 cleanall:
 	$(MAKE) cleandep
