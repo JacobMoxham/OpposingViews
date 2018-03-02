@@ -8,6 +8,9 @@ from dedupe_articles import get_unique_hashes, hash_dirty_text
 from multiprocessing import Pool
 import time
 
+# Number of threads to use to process items
+NUM_THREADS = 20
+
 
 def test(event):
     return [{"link": "http://www.bbc.co.uk/news/uk-politics-42929071",
@@ -56,11 +59,9 @@ def process_url(url, cached_article):
         return None
 
 
-# Used for fetching/processing articles
-pool = Pool(processes=20)
-
-
 def pipeline_test(passed_url, db=None):
+    pool = Pool(processes=NUM_THREADS)
+
     print("Got article suggestions request for URL '{:s}'".format(passed_url))
     # TODO: Use proper logger
     start_time = time.time()
@@ -156,4 +157,6 @@ def pipeline_test(passed_url, db=None):
         articles_to_return.append(ret_article)
 
     # return 3 suitable articles
+
+    pool.close()
     return articles_to_return
