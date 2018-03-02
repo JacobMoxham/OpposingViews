@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from global_config import USE_CACHING
-from mongo.database_access import HeuristicsDB
+from global_config import STORE_FEEDBACK
+from mongo_heuristics.database_access import HeuristicsDB
+from mongo_feedback.database_access import FeedbackDB
 import pipeline
 import json
 import time
@@ -14,6 +16,17 @@ from tornado import gen
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Hello, world")
+
+heur_db = None
+if USE_CACHING:
+    print("Using caching - connecting to db...")
+    heur_db = HeuristicsDB()
+
+feedback_db = None
+if STORE_FEEDBACK:
+    print("Storing feedback - connecting to db...")
+    feedback_db = FeedbackDB()
+
 
 class GetViewsHandler(tornado.web.RequestHandler):
     def post(self):
@@ -33,14 +46,17 @@ class GetViewsHandler(tornado.web.RequestHandler):
                 )
         self.write(res)
 
+
 class FeedbackHandler(tornado.web.RequestHandler):
     def post(self):
-        toSite = self.get_argument('toSite', '')
-        fromSite = self.get_argument('fromSite', '')
+        to_site = self.get_argument('toSite', '')
+        from_site = self.get_argument('fromSite', '')
         feedback = self.get_argument('feedback', '')
+        if STORE_FEEDBACK:
+            feedback_db.store_feedback(feedback, from_site, to_site)
         self.write(json.dumps({
-                'message': 'From site : ' + fromSite + 
-                            ' \n To site : ' + toSite + 
+                'message': 'From site : ' + from_site +
+                            ' \n To site : ' + to_site +
                             '\n Feedback: ' + feedback
                 }))
 
