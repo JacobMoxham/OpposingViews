@@ -5,6 +5,7 @@ const feedbackProcessingAPI = api_base + config.FEEDBACK_URL_SLUG;
 const backendProcessingAPI = api_base + config.ARTICLE_SUGGESTION_SLUG;
 
 const CACHE_TIMEOUT = config.CACHE_TIMEOUT;
+const CACHING_ENABLED = config.DISABLE_CACHING !== true;
 
 /*
  * Creates a list of items which represents a list of suggested
@@ -86,31 +87,38 @@ function onExtensionWindowLoad() {
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         const currentTab = tabs[0];
         const currentURL = currentTab.url;
-        
+        const cachedDataKey = currentURL + 'cache';
+
         handleCurrentPageFeedbackButtons(currentTab, currentURL);
 
-        var cachedDataKey = currentURL + 'cache';
-        console.log('Looking for item in cache');
-        chrome.storage.local.get(cachedDataKey,
-            (items) => {
-                if (items[cachedDataKey]
-                        && items[cachedDataKey].timeout > (new Date()).getTime()
-                        && items[cachedDataKey].res.length > 0) {
-                    console.log('Cache hit');
-                    createSuggestedArticleTable(
-                        items[cachedDataKey].res, 
-                        currentURL
-                    );
+        if (CACHING_ENABLED) {
+            console.log('Looking for item in cache');
+            chrome.storage.local.get(cachedDataKey,
+                (items) => {
+                    const cachedItem = items[cachedDataKey];
+
+                    if (cachedItem
+                        && cachedItem.timeout > (new Date()).getTime()
+                        && cachedItem.res.length > 0) {
+                        console.log('Cache hit');
+                        createSuggestedArticleTable(
+                            cachedItem.res,
+                            currentURL
+                        );
+                    }
+                    else {
+                        if (cachedItem)
+                            console.log('Item in cache, but not used');
+                        else
+                            console.log('Cache miss');
+                        getSuggestedArticleList(currentURL, cachedDataKey);
+                    }
                 }
-                else {
-                    if (items[cachedDataKey])
-                        console.log('Cache hit, but timeout');
-                    else
-                        console.log('Cache miss');
-                    getSuggestedArticleList(currentURL, cachedDataKey);
-                }
-            }
-        );
+            );
+        } else {
+            console.log('Not looking for item in cache: caching disabled');
+            getSuggestedArticleList(currentURL, cachedDataKey);
+        }
     });
 
 }

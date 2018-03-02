@@ -4,5 +4,6 @@ const config = {
     FEEDBACK_URL_SLUG : "feedback-processing",
     ARTICLE_SUGGESTION_SLUG : "get-views",
     CACHE_TIMEOUT : 1000 * 60 * 60 * 24 * 3,
-    IS_DEBUG : 0
+    IS_DEBUG : 1,
+    DISABLE_CACHING: false
 };
