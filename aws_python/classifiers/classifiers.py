@@ -8,8 +8,10 @@ import logging
 
 import numpy as np
 from sklearn.externals import joblib
+import pickle
 
 from .classifier_definitions import preprocess    # noqa: F401 (for flake8 linter)
+import classifiers.sentiment_classifier as sentiment_classifier
 
 # by default, classifer names are '<heuristic>_clf.pkl', CLASSIFER_FILENAMES contains any that don't follow that pattern
 CLASSIFIER_FILENAMES = {}
@@ -17,6 +19,7 @@ CLASSIFIER_FILENAMES = {}
 try:
     politics = joblib.load('politics_clf.pkl')
     tone = joblib.load('classifiers/tone_clf.pkl')
+    sentiment_data = sentiment_classifier.load()
 except FileNotFoundError as e:
     logging.error("Could not locate classifier '{}'".format(e.filename))
     sys.exit()
@@ -32,12 +35,20 @@ def classify_list(articles):
     texts = np.array([a['text'] for a in articles])
     politicses = politics.predict(texts)
     tones = tone.predict_proba(texts)
-
+    sentiments = sentiment_classifier.classify_all(sentiment_data, texts)
     result = []
     for i in range(len(texts)):
-        p = politicses[i]
+        p = float(politicses[i])
         t = tones[i][0] #Represents probability of neutrality
-        result.append({'source_politics' : p, 'source_tone' : t})
+        positivity =  sentiments[i]['positive']
+        negativity =  sentiments[i]['negative']
+        sentiment = (positivity + 1 - negativity) / 2
+        result.append( {'source_politics' : p, 
+                        'source_tone' : t, 
+#                        'source_positivity' : positivity,
+#                        'source_negativity' : negativity,
+                        'source_sentiment' : sentiment
+                        })
     return result
 
 

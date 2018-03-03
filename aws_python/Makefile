@@ -1,6 +1,8 @@
-PACKAGENAME=aws_python_test
+SHELL=/bin/bash
+
+PACKAGENAME=aws_python
 REMOTEUSER=ubuntu
-REMOTE=ec2-34-240-199-221.eu-west-1.compute.amazonaws.com
+REMOTE=ec2-34-245-119-189.eu-west-1.compute.amazonaws.com
 
 $(PACKAGENAME).zip:
 	#create zip package to upload to AWS
@@ -12,12 +14,14 @@ bin lib:
 .PHONY: deploy depend start clean cleandep cleanall
 
 cleandep:
-	$(if -d bin, rm -r bin)
-	$(if -d lib, rm -r lib)
-	$(if -r lib64, rm -r lib64)
+	if [ -e bin ]; then rm -r bin; fi;
+	if [ -e lib ]; then rm -r lib; fi;
+	if [ -h lib64 ]; then rm lib64; fi;
+	if [ -e pip-selfcheck.json ]; then rm pip-selfcheck.json; fi
+	if [ -e include ]; then rm -r include; fi
 
 clean:
-	$(if -r $(PACKAGENAME).zip, rm $(PACKAGENAME).zip)
+	if [ -e $(PACKAGENAME).zip ]; then rm $(PACKAGENAME).zip; fi;
 
 cleanall:
 	$(MAKE) cleandep
@@ -33,6 +37,6 @@ deploy: $(PACKAGENAME).zip
 
 start:
 	$(MAKE) depend
-	killall -q python3 ; echo 1
+	killall -q python3 || echo 1
 	bash -c 'source "bin/activate" ; ./server.py & '
 	#At this point is is safe to Ctrl-C if necessary

@@ -2,6 +2,7 @@ aws_python/aws.zip
 aws_feedback/aws.zip
 aws_python/classifiers/*.csv
 aws_python/.deploy
+analysis_graphs/*.png
 *.csv
 
 # Ignore optimised/compiled files
@@ -13,3 +14,5 @@ __pycache__/
 ._*
 *~
 
+machine_learning_research/data
+plugin/config.js

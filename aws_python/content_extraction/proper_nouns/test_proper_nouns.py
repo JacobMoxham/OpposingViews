@@ -1,4 +1,5 @@
 from content_extraction.newspaper.extract_content_newspaper import ExtractContentNewspaper
+from content_extraction.proper_nouns.extract_proper_nouns import ExtractProperNouns
 
 urls = [
     "http://www.bbc.co.uk/news/uk-politics-42867668",
@@ -10,18 +11,14 @@ urls = [
 ]
 
 n = ExtractContentNewspaper()
+pn = ExtractProperNouns()
 
 articles = [n.extract_content(url) for url in urls]
 
 for article in articles:
-    text = article['text']
-    keywords = article['keywords']
-    #im = article.top_image
-    title = article['title']
-    date = article['date']	
+    	
+    print (article['title'])
+    print("Title: ", pn.extract_proper_nouns(article['title']))
 
-    print("Title: ", title)
-    print ("Date: ",date)
-    print("Keywords: ", keywords)
-    print("Cleaned text, 100 chars: ", text[:100])
+    
 print("\n")

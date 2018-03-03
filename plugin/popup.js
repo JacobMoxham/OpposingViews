@@ -1,12 +1,11 @@
-const DEBUG = 0;
-const api_base_debug = "http://localhost:8080/";
-const api_base_production = "https://opposingviews.media/api/"
-const api_base = DEBUG ? api_base_debug : api_base_production;
+const DEBUG = config.IS_DEBUG
+const api_base = DEBUG ? config.DEBUG_URL_BASE : config.PROD_URL_BASE;
 
-const feedbackProcessingAPI = api_base + 'feedback-processing';
-const backendProcessingAPI = api_base + 'get-views';
+const feedbackProcessingAPI = api_base + config.FEEDBACK_URL_SLUG;
+const backendProcessingAPI = api_base + config.ARTICLE_SUGGESTION_SLUG;
 
-const CACHE_TIMEOUT = 1000 * 60 * 60 * 24 * 7;
+const CACHE_TIMEOUT = config.CACHE_TIMEOUT;
+const CACHING_ENABLED = config.DISABLE_CACHING !== true;
 
 /*
  * Creates a list of items which represents a list of suggested
@@ -30,6 +29,7 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
             var key = ev.data.link + 'prevURL'
             var keyval = {};
             keyval[key] = ev.data.previousLink;
+            sendFeedback('click', ev.data.previousLink, ev.data.link);
             chrome.storage.local.set(keyval, () => {
                 chrome.tabs.create({ url: ev.data.link });
             });
@@ -74,8 +74,9 @@ function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
     console.log(requestData);
     $.post(feedbackProcessingAPI, requestData)
     .done((res) => {
-            alert(JSON.parse(res).message);
-            thumbsElem.hide();
+            console.log(JSON.parse(res).message);
+            if (thumbsElem)
+                thumbsElem.hide();
     }).fail((jqXHR, textStatus, errorThrown) => {
             $("#suggested-article-loading-status").text(`Failed to submit feedback: ${textStatus}`);
     });
@@ -88,29 +89,38 @@ function onExtensionWindowLoad() {
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         const currentTab = tabs[0];
         const currentURL = currentTab.url;
-        
+        const cachedDataKey = currentURL + 'cache';
+
         handleCurrentPageFeedbackButtons(currentTab, currentURL);
 
-        var cachedDataKey = currentURL + 'cache';
-        console.log('Looking for item in cache');
-        chrome.storage.local.get(cachedDataKey,
-            (items) => {
-                if (items[cachedDataKey] && items[cachedDataKey].timeout > (new Date()).getTime()) {
-                    console.log('Cache hit');
-                    createSuggestedArticleTable(
-                        items[cachedDataKey].res, 
-                        currentURL
-                    );
+        if (CACHING_ENABLED) {
+            console.log('Looking for item in cache');
+            chrome.storage.local.get(cachedDataKey,
+                (items) => {
+                    const cachedItem = items[cachedDataKey];
+
+                    if (cachedItem
+                        && cachedItem.timeout > (new Date()).getTime()
+                        && cachedItem.res.length > 0) {
+                        console.log('Cache hit');
+                        createSuggestedArticleTable(
+                            cachedItem.res,
+                            currentURL
+                        );
+                    }
+                    else {
+                        if (cachedItem)
+                            console.log('Item in cache, but not used');
+                        else
+                            console.log('Cache miss');
+                        getSuggestedArticleList(currentURL, cachedDataKey);
+                    }
                 }
-                else {
-                    if (items[cachedDataKey])
-                        console.log('Cache hit, but timeout');
-                    else
-                        console.log('Cache miss');
-                    getSuggestedArticleList(currentURL, cachedDataKey);
-                }
-            }
-        );
+            );
+        } else {
+            console.log('Not looking for item in cache: caching disabled');
+            getSuggestedArticleList(currentURL, cachedDataKey);
+        }
     });
 
 }
@@ -161,17 +171,26 @@ function getSuggestedArticleList(currentURL, cachedDataKey) {
         console.log("using url " + currentURL);
         $.post(backendProcessingAPI, requestData)
         .done((res) => {
-
             res = JSON.parse(res);
 
-            console.log('Storing result to cache');
+            if (res.length > 0) {
+                console.log('Storing result to cache');
             
-            cachedResult = {'res' : res , 'timeout' : ((new Date()).getTime() + CACHE_TIMEOUT)};
-            var keyval = {};
-            keyval[cachedDataKey] = cachedResult;
-            chrome.storage.local.set(keyval);
+                cachedResult = {
+                    'res' : res , 
+                    'timeout' : ((new Date()).getTime() + CACHE_TIMEOUT)
+                };
+            
+                var keyval = {};
+                keyval[cachedDataKey] = cachedResult;
+                chrome.storage.local.set(keyval);
 
-            createSuggestedArticleTable(res, currentURL);
+                createSuggestedArticleTable(res, currentURL);
+            }
+            else {
+                $("#suggested-article-loading-status")
+                    .text('Unfortunately, no suitable articles could be found');
+            }
         })
         .fail((jqXHR, textStatus, errorThrown) => {
             $("#suggested-article-loading-status").text(`Failed to find suggested articles: ${textStatus}`);
