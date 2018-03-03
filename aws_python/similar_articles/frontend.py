@@ -38,22 +38,24 @@ def find_similar_articles(keywords):
 
     # initialise keywords_to_use
     keywords_to_use = keywords
+    next_article_to_get_keywords_for_index = 0
 
     # ensure we get at least 10 results
     while len(results) < 10:
-        backend_results = [b.get_similar_for_keywords(keywords) for b in backends]
+        backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
 
         # Interleave & de-duplicate results
         results.append(remove_duplicates_on_url(interleave(*backend_results)))
 
         # remove a keyword to broaden search
-        if len(keywords) > 1:
+        if len(keywords_to_use) > 1:
             keywords_to_use = keywords_to_use[:-1]
-        elif len(results) > 0:
+        elif len(results) > next_article_to_get_keywords_for_index:
             # flatten search graph by finding similar articles using keywords from an article we have already found
-            print('using results for:', results[0])
-            new_keywords = extract_content(results[0])['keywords']
-            keywords += new_keywords
+            print('using additional keywords for:', results[next_article_to_get_keywords_for_index])
+            new_keywords = extract_content(results[next_article_to_get_keywords_for_index])['keywords']
+            keywords_to_use += new_keywords
+            next_article_to_get_keywords_for_index += 1
         else:
             # give up and return nothing
             break
