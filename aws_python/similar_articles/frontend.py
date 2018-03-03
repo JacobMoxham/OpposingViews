@@ -2,6 +2,7 @@ from .backend_bing import BackendBing
 from .backend_google import BackendGoogle
 import itertools
 from urllib.parse import urldefrag
+from content_extraction.extract_content import extract_content
 
 backends = [BackendBing(), BackendGoogle()]
 
@@ -33,11 +34,32 @@ def find_similar_articles(keywords):
     """
     Format: [{'title':<title>, 'url':<url>}, ...]
     """
-    backend_results = [b.get_similar_for_keywords(keywords) for b in backends]
+    results = []
 
-    # Interleave & de-duplicate results
-    results = remove_duplicates_on_url(interleave(*backend_results))
-    return results
+    # initialise keywords_to_use
+    keywords_to_use = keywords
+
+    # ensure we get at least 10 results
+    while len(results) < 10:
+        backend_results = [b.get_similar_for_keywords(keywords) for b in backends]
+
+        # Interleave & de-duplicate results
+        results.append(remove_duplicates_on_url(interleave(*backend_results)))
+
+        # remove a keyword to broaden search
+        if len(keywords) > 1:
+            keywords_to_use = keywords_to_use[:-1]
+        elif len(results) > 0:
+            # flatten search graph by finding similar articles using keywords from an article we have already found
+            print('using results for:', results[0])
+            new_keywords = extract_content(results[0])['keywords']
+            keywords += new_keywords
+        else:
+            # give up and return nothing
+            break
+
+    # return up to 15 results
+    return results[:15]
 
 
 def get_similar_article_backend_results(keywords):
