@@ -40,15 +40,16 @@ def find_similar_articles(keywords):
     keywords_to_use = keywords
     next_article_to_get_keywords_for_index = 0
 
+    backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
+
+    # Interleave & de-duplicate results
+    results.append(remove_duplicates_on_url(interleave(*backend_results)))
+
     # ensure we get at least 10 results
     while len(results) < 10:
-        backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
-
-        # Interleave & de-duplicate results
-        results.append(remove_duplicates_on_url(interleave(*backend_results)))
-
-        # remove a keyword to broaden search
         if len(keywords_to_use) > 1:
+            # remove a keyword to broaden search
+            print('reducing keywords by 1')
             keywords_to_use = keywords_to_use[:-1]
         elif len(results) > next_article_to_get_keywords_for_index:
             # flatten search graph by finding similar articles using keywords from an article we have already found
@@ -59,6 +60,11 @@ def find_similar_articles(keywords):
         else:
             # give up and return nothing
             break
+
+        backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
+
+        # Interleave & de-duplicate results
+        results.append(remove_duplicates_on_url(interleave(*backend_results)))
 
     # return up to 15 results
     return results[:15]
