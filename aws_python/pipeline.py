@@ -9,7 +9,7 @@ from multiprocessing import Pool
 import time
 
 # Number of threads to use to process items
-NUM_THREADS = 20
+NUM_THREADS = 10
 
 
 def test(event):

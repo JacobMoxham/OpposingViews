@@ -33,7 +33,7 @@ depend: bin lib
 deploy: $(PACKAGENAME).zip
 	ssh $(REMOTEUSER)@$(REMOTE) "mkdir -p $(PACKAGENAME)"
 	scp $(PACKAGENAME).zip "$(REMOTEUSER)@$(REMOTE):$(PACKAGENAME)/"
-	ssh $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip; $(MAKE) start"
+	ssh $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip"
 
 start:
 	$(MAKE) depend
