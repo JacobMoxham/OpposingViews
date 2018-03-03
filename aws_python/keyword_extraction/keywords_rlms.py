@@ -38,7 +38,7 @@ def keywords(title, text, n=5, title_multiplier=2, threshold_count=4, ignore_pun
         return ordered[:n]
     # otherwise use the title
     else:
-        ordered = sorted(word_tokenize(title.lower()), key=lambda w: BASE_FREQS.get(key, MIN_FREQ / 1))
+        ordered = sorted(word_tokenize(title.lower()), key=lambda w: BASE_FREQS.get(w, MIN_FREQ / 1))
         if ignore_punctuation:
             ordered = [w for w in ordered if w not in stop_words and not w.isdigit() and w.isalnum()]
         return ordered[:n]
