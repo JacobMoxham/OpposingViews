@@ -1,8 +1,7 @@
 import json
 from collections import Counter
+from keyword_extraction.tokenize_keywords import filter_tokens
 
-from nltk import word_tokenize
-from nltk.corpus import stopwords
 
 with open('brown_freqs.json') as f:
     BASE_FREQS = json.load(f)
@@ -18,27 +17,22 @@ def keywords(title, text, n=5, title_multiplier=2, threshold_count=4, ignore_pun
     If keywords can't be extracted from the body, just take words from the title with the lowest frequencies in the
     Brown corpus.
     """
-    tokens = word_tokenize(text.lower())
+    tokens = filter_tokens(text)
     counts = Counter(tokens)
     for key in counts:
-        title_counts = Counter(word_tokenize(title.lower()))
+        title_counts = Counter(filter_tokens(title))
         counts[key] += title_counts[key] * title_multiplier
 
     freqs = {key: counts[key] / len(tokens) for key in counts if counts[key] >= threshold_count}
     if ignore_punctuation:
         freqs = {key: freqs[key] for key in freqs if key.isalnum()}
     # technically add-[minimum count in Brown corpus] rather than add-one smoothing
-    relative = {key: freqs[key] / BASE_FREQS.get(key, MIN_FREQ / 1) for key in freqs}
+    relative = {key: freqs[key] / BASE_FREQS.get(key, MIN_FREQ) for key in freqs}
     ordered = sorted(list(relative.keys()), key=lambda x: relative[x], reverse=True)
-
-    stop_words = stopwords.words('english')
-    ordered = [w for w in ordered if w not in stop_words and not w.isdigit() and w.isalnum()]
 
     if len(ordered) >= n:
         return ordered[:n]
     # otherwise use the title
     else:
-        ordered = sorted(word_tokenize(title.lower()), key=lambda w: BASE_FREQS.get(w, MIN_FREQ / 1))
-        if ignore_punctuation:
-            ordered = [w for w in ordered if w not in stop_words and not w.isdigit() and w.isalnum()]
+        ordered = sorted(filter_tokens(title), key=lambda w: BASE_FREQS.get(w, MIN_FREQ))
         return ordered[:n]
