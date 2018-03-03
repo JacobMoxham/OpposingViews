@@ -64,6 +64,4 @@ def filter_names(title, text, keywords):
         else:
             new_keywords.append(k)
 
-    new_keywords.extend(old_keywords)
-
-    return new_keywords
+    return new_keywords, old_keywords

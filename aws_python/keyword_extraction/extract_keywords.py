@@ -2,8 +2,7 @@ from keyword_extraction.keywords_rlms import keywords as k_r
 from keyword_extraction.keywords_simple import keywords as k_s
 from keyword_extraction.keywords_weighted import keywords as k_w
 from keyword_extraction.tokenize_keywords import tokenize, post_tokenize, filter_names
-# from keywords_metadata import keywords as k_m
-
+from content_extraction.proper_nouns.extract_proper_nouns import ExtractProperNouns
 
 def k_union(title, text, n):
     r = k_r(title, text, n)
@@ -18,20 +17,33 @@ def k_union(title, text, n):
         if len(r) > x:
             union.append(r[x])
 
-    return filter_names(title, text, sorted(set(union), key=lambda x: union.index(x)))[:n+1]
+    new, old = filter_names(title, text, sorted(set(union), key=lambda x: union.index(x)))
+
+    if len(new) < n:
+        new.extend(old)
+        return new[:n]
+
+    return new[:n + 1]
 
 
-def keywords(title, text, n=5, ipl=1):
+def k_proper_nouns(title, text, rawtext, n):
+    return list(set(k_union(title, text, n)).union(ExtractProperNouns().extract_proper_nouns(rawtext)))
+
+
+options = [
+    k_union,
+    k_r,
+    k_s,
+    k_w,
+    ]
+
+
+def keywords(title, text, ipl=0, n=5):
     """
     Runs a keyword extraction implementation depending on passed arguments.
     """
 
-    options = {
-                1: k_union,
-                2: k_r,
-                3: k_s,
-                4: k_w,
-                # 5: sqr,
-               }
+    if ipl == 4:
+        return k_proper_nouns(tokenize(title), tokenize(text), text, n)
 
     return options[ipl](tokenize(title), tokenize(text), n)
