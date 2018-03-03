@@ -8,13 +8,19 @@ def hasnum(s):
 
 
 def get_names(words):
-    return [x[0].isupper() in words]
+    caps = set([w for w in words if len(w) > 1 and w[0].isupper() and not w[1].isupper()])
+    names = []
+    for c in caps:
+        if not c.lower() in words:
+            names.append(c)
+    return names
 
 
 def filter_tokens(words):
     # tokenize + removal of stopwords and numbers
+    words = [w.lower() for w in words]
     stop_words = stopwords.words('english') + list(punctuation)
-    return [w.lower() for w in words if w not in stop_words and not hasnum(w) and w.isalnum()]
+    return [w for w in words if w not in stop_words and not hasnum(w) and w.isalnum()]
 
 
 def tokenize(text):
@@ -50,8 +56,14 @@ def filter_names(title, text, keywords):
     names = [w.lower() for w in get_names(text)]
     title_tokens = filter_tokens(title)
 
+    new_keywords = []
+    old_keywords = []
     for k in keywords:
         if k in names and k not in title_tokens:
-            keywords.remove(k)
+            old_keywords.append(k)
+        else:
+            new_keywords.append(k)
 
-    return keywords
+    new_keywords.extend(old_keywords)
+
+    return new_keywords
