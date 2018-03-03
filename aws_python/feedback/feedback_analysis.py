@@ -27,7 +27,6 @@ def plot_pos_percentages(db, urls=None):
     plt.title('Positivity of feedback for articles in bins of size 0.1')
     plt.xlabel('Proportions of positive feedback')
     plt.ylabel('Number of articles')
-    plt.ylim([0,1])
     plt.savefig('../../analysis_graphs/article_positivity.png')
 
 
