@@ -42,8 +42,10 @@ def find_similar_articles(keywords):
 
     backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
 
-    # Interleave & de-duplicate results
-    results.append(remove_duplicates_on_url(interleave(*backend_results)))
+    # interleave & de-duplicate results
+    results = remove_duplicates_on_url(results + interleave(*backend_results))
+
+    print('initially got', len(results), results)
 
     # ensure we get at least 10 results
     while len(results) < 10:
@@ -54,17 +56,17 @@ def find_similar_articles(keywords):
         elif len(results) > next_article_to_get_keywords_for_index:
             # flatten search graph by finding similar articles using keywords from an article we have already found
             print('using additional keywords for:', results[next_article_to_get_keywords_for_index])
-            new_keywords = extract_content(results[next_article_to_get_keywords_for_index])['keywords']
+            new_keywords = extract_content(results[next_article_to_get_keywords_for_index]['url'])['keywords']
             keywords_to_use += new_keywords
             next_article_to_get_keywords_for_index += 1
         else:
-            # give up and return nothing
+            # give up and return what we have
             break
 
         backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
 
-        # Interleave & de-duplicate results
-        results.append(remove_duplicates_on_url(interleave(*backend_results)))
+        # interleave & de-duplicate results
+        results = remove_duplicates_on_url(results + interleave(*backend_results))
 
     # return up to 15 results
     return results[:15]
