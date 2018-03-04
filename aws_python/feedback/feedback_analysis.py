@@ -29,7 +29,7 @@ def plot_pos_percentages(db, urls=None):
     plt.title('Positivity of feedback for articles in bins of size 0.1')
     plt.xlabel('Proportions of positive feedback')
     plt.ylabel('Number of articles')
-    plt.savefig('../../analysis_graphs/article_positivity.png')
+    plt.savefig('../analysis_graphs/article_positivity.png')
 
 
 def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
@@ -95,7 +95,7 @@ def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
     plt.xlabel('Political leanings of \'from\' articles and \'to\' articles')
     plt.ylabel('Proportion of positive feedback')
     plt.title('Positivity of feedback broken down by political leanings \n of the initial site and the suggested site')
-    plt.savefig('../../analysis_graphs/article_positivity_by_politics_to_and_from.png')
+    plt.savefig('../analysis_graphs/article_positivity_by_politics_to_and_from.png')
 
 
 def plot_politics_per_site(urls, heur_db=None):
@@ -105,26 +105,47 @@ def plot_politics_per_site(urls, heur_db=None):
     urls_to_counts = {}
     for url in urls:
         article = extract_content(url)
-        if heur_db is not None:
-            entry = heur_db.read_article(url)
-            if entry is None:
-                heurs = classify(article)
-            else:
-                heurs = entry['heuristics']
+        entry = heur_db.read_article(url)
+        if entry is None:
+            heurs = classify(article)
+        else:
+            heurs = entry['heuristics']
 
-            url_stripped = urlsplit(url).netloc
+        url_stripped = urlsplit(url).netloc
 
-            if urls_to_counts.get(url_stripped) is None:
-                urls_to_counts[url_stripped] = {'left': 0, 'right': 0}
+        if urls_to_counts.get(url_stripped) is None:
+            urls_to_counts[url_stripped] = {'left': 0, 'right': 0}
 
-            if heurs['source_politics'] == 0:
-                urls_to_counts[url_stripped]['left'] += 1
-            else:
-                urls_to_counts[url_stripped]['right'] += 1
+        if heurs['source_politics'] == 0:
+            urls_to_counts[url_stripped]['left'] += 1
+        else:
+            urls_to_counts[url_stripped]['right'] += 1
 
-        unique_urls = urls_to_counts.keys()
-        url_left_proportions = [urls_to_counts[url]['left'] / (urls_to_counts[url]['left'] +
-                                                               urls_to_counts[url]['right']) for url in unique_urls]
+    unique_urls = urls_to_counts.keys()
+    short_urls = [url.split('.')[1] for url in urls_to_counts.keys()]
+    url_left_proportions = [urls_to_counts[url]['left'] / (urls_to_counts[url]['left'] +
+                                                           urls_to_counts[url]['right']) for url in unique_urls]
+    plt.clf()
 
-        plt.bar(unique_urls, url_left_proportions)
-        plt.show()
+    plt.bar(short_urls, url_left_proportions)
+    plt.ylim([0,1])
+    plt.xlabel('Sites')
+    plt.xlabel('Proportion of left leaning articles')
+    plt.title('Proportions of left leaning articles for various sites')
+    plt.savefig('../analysis_graphs/per_site_politics.png')
+
+
+def amount_of_user_feedback(db):
+    links = db.get_all_links()
+    feedback = 0
+    clicked = 0
+    for l in links:
+        if l[feedback] == 'click':
+            clicked+=1
+        else:
+            feedback += 1
+
+    if clicked > 0:
+        return clicked / (clicked + feedback)
+    else:
+        return 0

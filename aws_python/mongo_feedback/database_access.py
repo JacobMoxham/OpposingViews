@@ -64,6 +64,20 @@ class FeedbackDB():
 
         return neg
 
+    def count_just_clicked(self, url, links=None):
+        if links is None:
+            # find documents terminating at passed url
+            links = self.db.feedback_links.find({'to': url})
+
+        # initialise count
+        clicks = 0
+        # count positive feedback
+        for l in links:
+            if l['feedback'] == 'click':
+                clicks += 1
+
+        return clicks
+
     def percentage_positive(self, url, links = None):
 
         if links is None:
@@ -71,9 +85,11 @@ class FeedbackDB():
             links = self.db.feedback_links.find({'to': url})
 
         pos = self.count_pos(url, links)
+        neg = self.count_neg(url, links)
+        clicks = self.count_just_clicked(url, links)
 
         # TODO: check this is not int
         if pos > 0:
-            return pos / len(links)
+            return pos / (pos+neg+clicks)
         else:
             return 0
