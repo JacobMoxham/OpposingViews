@@ -1,7 +1,7 @@
 from goose3 import Goose
 
 from content_extraction.extract_content_backend import ExtractContentBackend
-
+import articleDateExtractor
 
 class ExtractContentGoose(ExtractContentBackend):
 
@@ -43,6 +43,7 @@ class ExtractContentGoose(ExtractContentBackend):
             'title': article.title,
             'keywords': article.meta_keywords.split(","),
             'url': url,
-            'text': article.cleaned_text
+            'text': article.cleaned_text,
+            'date': articleDateExtractor.extractArticlePublishedDate(url, article.raw_html),
         }
         return to_return

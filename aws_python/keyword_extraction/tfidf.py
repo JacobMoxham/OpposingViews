@@ -1,8 +1,6 @@
 import numpy as np
 from nltk.corpus import reuters
-from nltk.corpus import stopwords
-from nltk import word_tokenize
-from string import punctuation
+from keyword_extraction.tokenize_keywords import tokenize, filter_tokens
 from collections import Counter
 import json
 
@@ -11,17 +9,10 @@ import json
 # url = 'http://edition.cnn.com/2012/02/22/world/europe/uk-occupy-london/index.html?hpt=ieu_c2'
 
 
-def tokenize(text):
-    # tokenize + removal of stopwords and numbers
-    stop_words = stopwords.words('english') + list(punctuation)
-    words = word_tokenize(text.lower())
-    return [w for w in words if w not in stop_words and not w.isdigit() and w.isalnum()]
-
-
 def get_idf():
     vocabulary = set()
     for file_id in reuters.fileids():
-        words = tokenize(reuters.raw(file_id))
+        words = filter_tokens(tokenize(reuters.raw(file_id)))
         vocabulary.update(words)
 
     vocabulary = list(vocabulary)
@@ -33,7 +24,7 @@ def get_idf():
 
     word_idf = np.zeros(vocabulary_size)
     for file_id in reuters.fileids():
-        words = set(tokenize(reuters.raw(file_id)))
+        words = set(filter_tokens(tokenize(reuters.raw(file_id))))
         indexes = [internal_word_index[word] for word in words]
         word_idf[indexes] += 1.0
 
@@ -50,7 +41,7 @@ def get_idf():
 
 
 def tfidf(text, word_idf):
-    text = tokenize(text)
+    text = filter_tokens(text)
     length = len(text)
     tfidf = Counter(text)
 
@@ -64,7 +55,7 @@ def tfidf(text, word_idf):
 
 
 def tfidf_weighted(text, word_idf):
-    text = tokenize(text)
+    text = filter_tokens(text)
     length = len(text)
 
     start = text[0:100]

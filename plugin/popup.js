@@ -29,6 +29,7 @@ function createSuggestedArticleTable(suggestedArticles, currentArticleURL) {
             var key = ev.data.link + 'prevURL'
             var keyval = {};
             keyval[key] = ev.data.previousLink;
+            sendFeedback('click', ev.data.previousLink, ev.data.link);
             chrome.storage.local.set(keyval, () => {
                 chrome.tabs.create({ url: ev.data.link });
             });
@@ -73,8 +74,9 @@ function sendFeedback(feedback, fromLink, suggestedArticleLink, thumbsElem) {
     console.log(requestData);
     $.post(feedbackProcessingAPI, requestData)
     .done((res) => {
-            alert(JSON.parse(res).message);
-            thumbsElem.hide();
+            console.log(JSON.parse(res).message);
+            if (thumbsElem)
+                thumbsElem.hide();
     }).fail((jqXHR, textStatus, errorThrown) => {
             $("#suggested-article-loading-status").text(`Failed to submit feedback: ${textStatus}`);
     });

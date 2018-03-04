@@ -7,20 +7,6 @@ import numpy as np
 import pickle
 import pandas as pd
 import logging
-
-LEXICON_FILENAME = "classifiers/sentiment_lexicon"
-PICKLE_FILENAME = "classifiers/sentiments.pkl"
-SENTIMENTS = ['positive', 'negative']
-
-def read_documents():
-    logging.info("Reading own-scraped documents...")
-    data = []
-    for doctype in ['neutral', 'opinion']:
-        file_names = [x for x in os.listdir(getFolderRoot(doctype)) if x.isdigit()]
-        for file_name in file_names:
-            with open(getFolderRoot(doctype) + file_name) as f:
-                data.append(str(f.read()))
-    return data
  
 def load_lexicon():
     logging.info("Loading lexicon...")
@@ -33,6 +19,21 @@ def load_lexicon():
             lexicon[entry['word']] = entry
         return lexicon
 
+
+LEXICON_FILENAME = "classifiers/sentiment_lexicon"
+PICKLE_FILENAME = "classifiers/sentiments.pkl"
+SENTIMENTS = ['positive', 'negative']
+LEXICON = load_lexicon()
+
+def read_documents():
+    logging.info("Reading own-scraped documents...")
+    data = []
+    for doctype in ['neutral', 'opinion']:
+        file_names = [x for x in os.listdir(getFolderRoot(doctype)) if x.isdigit()]
+        for file_name in file_names:
+            with open(getFolderRoot(doctype) + file_name) as f:
+                data.append(str(f.read()))
+    return data
 def get_sentiment_distribution(text, lexicon, intensity_parameter = {'strong' : 1, 'weak' : 0.5}):
     words = text.split()
     word_pattern = re.compile(r"[A-Z-]+", re.IGNORECASE)
@@ -64,12 +65,11 @@ def get_kaggle_dataset():
 def train_sentiment_distribution():
     data = get_train_data()
     distributions = {sentiment : [] for sentiment in SENTIMENTS}
-    lexicon = load_lexicon()
     logging.info("Training classifier...")
     percentile = len(data) // 100
     count = 0
     for text in data:
-        sentiment_distribution = get_sentiment_distribution(text, lexicon)
+        sentiment_distribution = get_sentiment_distribution(text, LEXICON)
         for sentiment in SENTIMENTS:
             if sentiment in sentiment_distribution:
                 distributions[sentiment].append(sentiment_distribution[sentiment])
@@ -84,7 +84,7 @@ def train_sentiment_distribution():
 def classify(sorted_training_data, test_data):
     logging.info("Scoring text...")
     result = {}
-    test_distribution = get_sentiment_distribution(test_data, load_lexicon())
+    test_distribution = get_sentiment_distribution(test_data, LEXICON)
     for sentiment in SENTIMENTS:
         array = sorted_training_data[sentiment]
         if sentiment in test_distribution:
