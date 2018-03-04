@@ -1,5 +1,7 @@
 from mongo_feedback.database_access import FeedbackDB
 import feedback.feedback_analysis as fba
+import argparse
+import os
 
 db = FeedbackDB()
 
@@ -21,6 +23,25 @@ urls = ['http://www.bbc.co.uk/sport/football/43278166',
         'http://www.huffingtonpost.co.uk/entry/squatters-activists-london_uk_5a993b81e4b0479c02516c21?utm_hp_ref=uk-homepage',
         'http://www.huffingtonpost.co.uk/entry/tory-mps-will-not-get-free-vote-on-brexit-deal-says-david-lidington_uk_5a9bf07ce4b089ec353b2390?43&utm_hp_ref=uk-homepage'
 ]
-fba.plot_politics_per_site(urls)
 
-print(fba.amount_of_user_feedback())
+parser = argparse.ArgumentParser()
+parser.add_argument("-f1", help='file1 to run politics per site on', default='')
+parser.add_argument("-f2", help='file1 to run politics per site on', default='')
+
+args = parser.parse_args()
+urls_to_pass = []
+if args.f1 == '' and args.f2 == '':
+    urls_to_pass = urls
+elif args.f1 != '':
+    with open(args.f1) as f:
+        content = f.readlines()
+        urls_to_pass += [x.strip() for x in content]
+elif args.f2 != '':
+    with open(args.f2) as f:
+        content = f.readlines()
+        urls_to_pass += [x.strip() for x in content]
+
+
+fba.plot_politics_per_site(urls_to_pass)
+
+print(fba.amount_of_user_feedback(db))
