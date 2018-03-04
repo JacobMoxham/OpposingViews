@@ -12,3 +12,4 @@ ssdeep
 tornado
 pandas
 matplotlib
+articleDateExtractor

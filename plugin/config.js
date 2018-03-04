@@ -5,5 +5,5 @@ const config = {
     ARTICLE_SUGGESTION_SLUG : "get-views",
     CACHE_TIMEOUT : 1000 * 60 * 60 * 24 * 3,
     IS_DEBUG : 0,
-    DISABLE_CACHING: false
+    DISABLE_CACHING: true
 };
