@@ -7,3 +7,6 @@ urls = fba.get_all_urls(db)
 
 fba.plot_pos_percentages(db, urls)
 fba.plot_liked_alternate_or_same_political_leaning(db)
+
+urls = []
+fba.plot_politics_per_site(urls)
