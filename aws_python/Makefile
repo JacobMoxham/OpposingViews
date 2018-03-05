@@ -2,7 +2,7 @@ SHELL=/bin/bash
 
 PACKAGENAME=aws_python
 REMOTEUSER=ubuntu
-REMOTE=159.65.27.201
+REMOTE=opposingviews.media
 KEY=hotel2_key.txt
 
 $(PACKAGENAME).zip:
