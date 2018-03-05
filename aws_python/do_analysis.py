@@ -43,5 +43,3 @@ elif args.f2 != '':
 
 
 fba.plot_politics_per_site(urls_to_pass)
-
-print(fba.amount_of_user_feedback(db))
