@@ -42,4 +42,4 @@ elif args.f2 != '':
         urls_to_pass += [x.strip() for x in content]
 
 
-fba.plot_politics_per_site(urls_to_pass)
+#fba.plot_politics_per_site(urls_to_pass)
