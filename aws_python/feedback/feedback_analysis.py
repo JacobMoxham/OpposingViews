@@ -90,7 +90,7 @@ def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
             print('plot_liked_alternate_or_same_political_leaning: malformed tuple')
 
     # calculate pos proportions
-    left_left = left_right_pos / (left_right_pos + left_left_neg) if left_right_pos > 0 else 0
+    left_left = left_left_pos / (left_left_pos + left_left_neg) if left_left_pos > 0 else 0
     left_right = left_right_pos / (left_right_pos + left_right_neg) if left_right_pos > 0 else 0
     right_left = right_left_pos / (right_left_pos + right_left_neg) if right_left_pos > 0 else 0
     right_right = right_right_pos / (right_right_pos + right_right_neg) if right_right_pos > 0 else 0
