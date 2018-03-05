@@ -2,7 +2,7 @@ SHELL=/bin/bash
 
 PACKAGENAME=aws_python
 REMOTEUSER=ubuntu
-REMOTE=ec2-34-245-119-189.eu-west-1.compute.amazonaws.com
+REMOTE=159.65.27.201
 
 $(PACKAGENAME).zip:
 	#create zip package to upload to AWS
@@ -31,9 +31,9 @@ depend: bin lib
 	bash -c 'source "bin/activate" ; pip3 install -r requirements.txt ; deactivate'
 
 deploy: $(PACKAGENAME).zip
-	ssh $(REMOTEUSER)@$(REMOTE) "mkdir -p $(PACKAGENAME)"
-	scp $(PACKAGENAME).zip "$(REMOTEUSER)@$(REMOTE):$(PACKAGENAME)/"
-	ssh $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip"
+	ssh -i ~/Documents/ComputerScience/GroupProjectHotel/hotel2_key.txt $(REMOTEUSER)@$(REMOTE) "mkdir -p $(PACKAGENAME)"
+	scp -i ~/Documents/ComputerScience/GroupProjectHotel/hotel2_key.txt $(PACKAGENAME).zip "$(REMOTEUSER)@$(REMOTE):$(PACKAGENAME)/"
+	ssh -i ~/Documents/ComputerScience/GroupProjectHotel/hotel2_key.txt $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip"
 
 start:
 	$(MAKE) depend

@@ -2,6 +2,7 @@ from .backend_bing import BackendBing
 from .backend_google import BackendGoogle
 import itertools
 from urllib.parse import urldefrag
+from content_extraction.extract_content import extract_content
 
 backends = [BackendBing(), BackendGoogle()]
 
@@ -33,11 +34,42 @@ def find_similar_articles(keywords):
     """
     Format: [{'title':<title>, 'url':<url>}, ...]
     """
-    backend_results = [b.get_similar_for_keywords(keywords) for b in backends]
+    results = []
 
-    # Interleave & de-duplicate results
-    results = remove_duplicates_on_url(interleave(*backend_results))
-    return results
+    # initialise keywords_to_use
+    keywords_to_use = keywords
+    next_article_to_get_keywords_for_index = 0
+
+    backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
+
+    # interleave & de-duplicate results
+    results = remove_duplicates_on_url(results + interleave(*backend_results))
+
+    print('initially got', len(results), results)
+
+    # ensure we get at least 10 results
+    while len(results) < 10:
+        if len(keywords_to_use) > 1:
+            # remove a keyword to broaden search
+            print('reducing keywords by 1')
+            keywords_to_use = keywords_to_use[:-1]
+        elif len(results) > next_article_to_get_keywords_for_index:
+            # flatten search graph by finding similar articles using keywords from an article we have already found
+            print('using additional keywords for:', results[next_article_to_get_keywords_for_index])
+            new_keywords = extract_content(results[next_article_to_get_keywords_for_index]['url'])['keywords']
+            keywords_to_use += new_keywords
+            next_article_to_get_keywords_for_index += 1
+        else:
+            # give up and return what we have
+            break
+
+        backend_results = [b.get_similar_for_keywords(keywords_to_use) for b in backends]
+
+        # interleave & de-duplicate results
+        results = remove_duplicates_on_url(results + interleave(*backend_results))
+
+    # return up to 15 results
+    return results[:15]
 
 
 def get_similar_article_backend_results(keywords):
