@@ -19,7 +19,7 @@ def get_names(words):
 def filter_tokens(words):
     # tokenize + removal of stopwords and numbers
     words = [w.lower() for w in words]
-    stop_words = stopwords.words('english') + list(punctuation)
+    stop_words = stopwords.words('english') + list(punctuation) + ['mr', 'dr', 'mrs']
     return [w for w in words if w not in stop_words and not hasnum(w) and w.isalnum()]
 
 
