@@ -3,8 +3,8 @@ SHELL=/bin/bash
 PACKAGENAME=aws_python
 REMOTEUSER=ubuntu
 REMOTE=opposingviews.media
-SSH_ARGS="-i $(KEY)"
-KEY=hotel2_key.txt
+SSH_ARGS=-i $(KEY)
+KEY=$(HOME)/.ssh/id_rsa
 
 $(PACKAGENAME).zip:
 	#create zip package to upload to AWS
