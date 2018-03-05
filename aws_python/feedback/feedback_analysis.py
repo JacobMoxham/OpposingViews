@@ -151,21 +151,3 @@ def plot_politics_per_site(urls, heur_db=None):
     plt.xlabel('Proportion of left leaning articles')
     plt.title('Proportions of left leaning articles for various sites')
     plt.savefig('../analysis_graphs/per_site_politics.png')
-
-
-def amount_of_user_feedback(db):
-    # get the links
-    links = db.get_all_links()
-    # count how many clicked links actually have feedback
-    feedback = 0
-    clicked = 0
-    for l in links:
-        if l[feedback] == 'click':
-            clicked+=1
-        else:
-            feedback += 1
-
-    if clicked > 0:
-        return clicked / (clicked + feedback)
-    else:
-        return 0

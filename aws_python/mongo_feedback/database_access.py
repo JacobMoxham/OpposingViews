@@ -13,25 +13,15 @@ class FeedbackDB():
         return self.db.feedback_links.find()
 
     def store_feedback(self, feedback, from_url, to_url):
-
-        feedback_links = self.db.feedback_links
-
-        if feedback != 'click':
-            # check db for 'click' entry
-            feedback_link = feedback_links.find({'from': from_url, 'to': to_url})
-
-        if feedback_link is None:
-            # create link
-            feedback_link = {
-                'feedback': feedback,
-                'from': from_url,
-                'to': to_url
-            }
-        else:
-            # just update the feedback
-            feedback_link['feedback'] = feedback
+        # create link
+        feedback_link = {
+            'feedback': feedback,
+            'from': from_url,
+            'to': to_url
+        }
 
         # store in db
+        feedback_links = self.db.feedback_links
         feedback_links.insert_one(feedback_link)
 
     def count_pos(self, url, links=None):
@@ -86,10 +76,9 @@ class FeedbackDB():
 
         pos = self.count_pos(url, links)
         neg = self.count_neg(url, links)
-        clicks = self.count_just_clicked(url, links)
 
         # TODO: check this is not int
         if pos > 0:
-            return pos / (pos+neg+clicks)
+            return pos / (pos+neg)
         else:
             return 0
