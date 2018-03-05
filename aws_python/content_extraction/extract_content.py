@@ -1,6 +1,5 @@
 from content_extraction.goose.extract_content_goose import ExtractContentGoose
 from content_extraction.newspaper.extract_content_newspaper import ExtractContentNewspaper
-from content_extraction.proper_nouns.extract_proper_nouns import ExtractProperNouns
 from keyword_extraction.extract_keywords import keywords
 
 

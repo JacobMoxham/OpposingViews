@@ -13,14 +13,25 @@ class FeedbackDB():
         return self.db.feedback_links.find()
 
     def store_feedback(self, feedback, from_url, to_url):
-        # create link
-        feedback_link = {
-            'feedback': feedback,
-            'from': from_url,
-            'to': to_url
-        }
-        # store in db
+
         feedback_links = self.db.feedback_links
+
+        if feedback != 'click':
+            # check db for 'click' entry
+            feedback_link = feedback_links.find({'from': from_url, 'to': to_url})
+
+        if feedback_link is None:
+            # create link
+            feedback_link = {
+                'feedback': feedback,
+                'from': from_url,
+                'to': to_url
+            }
+        else:
+            # just update the feedback
+            feedback_link['feedback'] = feedback
+
+        # store in db
         feedback_links.insert_one(feedback_link)
 
     def count_pos(self, url, links=None):
@@ -53,6 +64,20 @@ class FeedbackDB():
 
         return neg
 
+    def count_just_clicked(self, url, links=None):
+        if links is None:
+            # find documents terminating at passed url
+            links = self.db.feedback_links.find({'to': url})
+
+        # initialise count
+        clicks = 0
+        # count positive feedback
+        for l in links:
+            if l['feedback'] == 'click':
+                clicks += 1
+
+        return clicks
+
     def percentage_positive(self, url, links = None):
 
         if links is None:
@@ -61,9 +86,10 @@ class FeedbackDB():
 
         pos = self.count_pos(url, links)
         neg = self.count_neg(url, links)
+        clicks = self.count_just_clicked(url, links)
 
         # TODO: check this is not int
         if pos > 0:
-            return pos / pos+neg
+            return pos / (pos+neg+clicks)
         else:
             return 0
