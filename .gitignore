@@ -16,3 +16,5 @@ __pycache__/
 
 machine_learning_research/data
 plugin/config.js
+
+aws_python/hotel2_key.txt
