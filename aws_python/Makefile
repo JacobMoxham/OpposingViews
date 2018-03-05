@@ -3,6 +3,7 @@ SHELL=/bin/bash
 PACKAGENAME=aws_python
 REMOTEUSER=ubuntu
 REMOTE=opposingviews.media
+SSH_ARGS="-i $(KEY)"
 KEY=hotel2_key.txt
 
 $(PACKAGENAME).zip:
@@ -32,9 +33,9 @@ depend: bin lib
 	bash -c 'source "bin/activate" ; pip3 install -r requirements.txt ; deactivate'
 
 deploy: $(PACKAGENAME).zip
-	ssh -i $(KEY) $(REMOTEUSER)@$(REMOTE) "mkdir -p $(PACKAGENAME)"
-	scp -i $(KEY) $(PACKAGENAME).zip "$(REMOTEUSER)@$(REMOTE):$(PACKAGENAME)/"
-	ssh -i $(KEY) $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip"
+	ssh $(SSH_ARGS) $(REMOTEUSER)@$(REMOTE) "mkdir -p $(PACKAGENAME)"
+	scp $(SSH_ARGS) $(PACKAGENAME).zip "$(REMOTEUSER)@$(REMOTE):$(PACKAGENAME)/"
+	ssh $(SSH_ARGS) $(REMOTEUSER)@$(REMOTE) "cd $(PACKAGENAME); unzip -o $(PACKAGENAME).zip"
 
 start:
 	$(MAKE) depend
