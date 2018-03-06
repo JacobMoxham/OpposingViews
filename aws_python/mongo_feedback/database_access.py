@@ -28,7 +28,8 @@ class FeedbackDB():
 
         if links is None:
             # find documents terminating at passed url
-            links = self.db.feedback_links.find({'to': url})
+            links_cursor = self.db.feedback_links.find({'to': url})
+            links = [l for l in links_cursor]
 
         # initialise count
         pos = 0
@@ -43,7 +44,8 @@ class FeedbackDB():
 
         if links is None:
             # find documents terminating at passed url
-            links = self.db.feedback_links.find({'to': url})
+            links_cursor = self.db.feedback_links.find({'to': url})
+            links = [l for l in links_cursor]
 
         # initialise count
         neg = 0
@@ -57,7 +59,8 @@ class FeedbackDB():
     def count_just_clicked(self, url, links=None):
         if links is None:
             # find documents terminating at passed url
-            links = self.db.feedback_links.find({'to': url})
+            links_cursor = self.db.feedback_links.find({'to': url})
+            links = [l for l in links_cursor]
 
         # initialise count
         clicks = 0
@@ -72,11 +75,14 @@ class FeedbackDB():
 
         if links is None:
             # find documents terminating at passed url
-            links = self.db.feedback_links.find({'to': url})
+            links_cursor = self.db.feedback_links.find({'to': url})
+
+        links = [l for l in links_cursor]
 
         pos = self.count_pos(url, links)
         neg = self.count_neg(url, links)
 
+        print('pos:', pos, 'neg:', neg)
         # TODO: check this is not int
         if pos > 0:
             return pos / (pos+neg)
