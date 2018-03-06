@@ -9,10 +9,10 @@ from classifiers.classifiers import classify
 def get_all_urls(db):
     # get the links table
     links = db.get_all_links()
-    urls = []
+    urls = set()
     # get the target urls from the links
     for l in links:
-        urls.append(l['to'])
+        urls.add(l['to'])
 
     return urls
 
@@ -101,6 +101,7 @@ def plot_liked_alternate_or_same_political_leaning(db, heur_db=None):
     # plot bar chart for each type of political link
     x = np.arange(4)
     plt.bar(x, [left_left, left_right, right_left, right_right])
+    print(left_left, left_right, right_left, right_right)
     plt.xticks(x, ('left-left', 'left-right', 'right-left', 'right-right'))
     plt.ylim([0, 1])
     plt.xlabel('Political leanings of \'from\' articles and \'to\' articles')
